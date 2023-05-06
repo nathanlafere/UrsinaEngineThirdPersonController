@@ -1,0 +1,253 @@
+{
+  "asset" : {
+    "generator" : "UE Viewer (umodel) build 1544 based",
+    "version" : "2.0"
+  },
+  "scene" : 0,
+  "scenes" : [
+    {
+      "nodes" : [ 0 ]
+    }
+  ],
+  "nodes" : [
+    {
+      "name" : "SK_W0004_V00_C00_Sword",
+      "mesh" : 0,
+      "skin" : 0,
+      "children" : [ 1 ]
+    },
+    {
+      "name" : "Root",
+      "children" : [ 2, 8 ],
+      "translation" : [ 0, 0, 0 ],
+      "rotation" : [ 0.707107, -0, -0, 0.707107 ]
+    },
+    {
+      "name" : "C_Sword_1",
+      "children" : [ 3, 6 ],
+      "translation" : [ 0, 0, -0 ],
+      "rotation" : [ -0, -0, 0, -1 ]
+    },
+    {
+      "name" : "C_Blade_1",
+      "children" : [ 4 ],
+      "translation" : [ 0, -0.089, -0 ],
+      "rotation" : [ 0, -0, 0.707107, -0.707107 ]
+    },
+    {
+      "name" : "C_Blade_2",
+      "children" : [ 5 ],
+      "translation" : [ 0.4, 6.93889e-18, -0 ],
+      "rotation" : [ -0, -0, -0.0436194, -0.999048 ]
+    },
+    {
+      "name" : "C_Blade_3",
+      "translation" : [ 0.335, 8.88178e-18, -0 ],
+      "rotation" : [ -0, -0, 0, -1 ]
+    },
+    {
+      "name" : "C_String_1",
+      "children" : [ 7 ],
+      "translation" : [ 0.005, 0.225, -0 ],
+      "rotation" : [ -6.76762e-17, -6.76762e-17, 0.993768, 0.111469 ]
+    },
+    {
+      "name" : "C_String_2",
+      "translation" : [ 0.053, 0, -0 ],
+      "rotation" : [ -0, -0, -0.0436194, -0.999048 ]
+    },
+    {
+      "name" : "C_Sheath_1",
+      "translation" : [ 0, -0.1763, -0 ],
+      "rotation" : [ -0, -0, 0, -1 ]
+    }
+  ],
+  "skins" : [
+    {
+      "inverseBindMatrices" : 0,
+      "skeleton" : 1,
+      "joints" : [
+        1,2,3,4,5,6,7,8
+      ]
+    }
+  ],
+  "materials" : [
+    {
+      "name" : "MI_W0004_V00_C00_0_Sword",
+      "pbrMetallicRoughness" : {
+        "baseColorFactor" : [ 0.3, 0.3, 0.3, 1.0 ],
+        "metallicFactor" : 0.1,
+        "roughnessFactor" : 0.5
+      }
+    }
+  ],
+  "meshes" : [
+    {
+      "primitives" : [
+        {
+          "attributes" : {
+            "POSITION" : 2,
+            "NORMAL" : 3,
+            "TANGENT" : 4,
+            "COLOR_0" : 5,
+            "JOINTS_0" : 6,
+            "WEIGHTS_0" : 7,
+            "TEXCOORD_0" : 8,
+            "TEXCOORD_1" : 9,
+            "TEXCOORD_2" : 10,
+            "TEXCOORD_3" : 11
+          },
+          "indices" : 1,
+          "material" : 0
+        }
+      ],
+      "name" : "SK_W0004_V00_C00_Sword"
+    }
+  ],
+  "buffers" : [
+    {
+      "uri" : "SK_W0004_V00_C00_Sword.bin",
+      "byteLength" : 292184
+    }
+  ],
+  "bufferViews" : [
+    {
+      "buffer" : 0,
+      "byteOffset" : 0,
+      "byteLength" : 512
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 512,
+      "byteLength" : 18960
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 19472,
+      "byteLength" : 37188
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 56660,
+      "byteLength" : 37188
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 93848,
+      "byteLength" : 49584
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 143432,
+      "byteLength" : 12396
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 155828,
+      "byteLength" : 24792
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 180620,
+      "byteLength" : 12396
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 193016,
+      "byteLength" : 24792
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 217808,
+      "byteLength" : 24792
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 242600,
+      "byteLength" : 24792
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 267392,
+      "byteLength" : 24792
+    }
+  ],
+  "accessors" : [
+    {
+      "bufferView" : 0,
+      "componentType" : 5126,
+      "count" : 8,
+      "type" : "MAT4"
+    },
+    {
+      "bufferView" : 1,
+      "componentType" : 5123,
+      "count" : 9480,
+      "type" : "SCALAR"
+    },
+    {
+      "bufferView" : 2,
+      "min" : [ -0.0595961, -0.0234068, -0.883801 ],
+      "max" : [ 0.051369, 0.0105523, 0.251577 ],
+      "componentType" : 5126,
+      "count" : 3099,
+      "type" : "VEC3"
+    },
+    {
+      "bufferView" : 3,
+      "componentType" : 5126,
+      "count" : 3099,
+      "type" : "VEC3"
+    },
+    {
+      "bufferView" : 4,
+      "componentType" : 5126,
+      "count" : 3099,
+      "type" : "VEC4"
+    },
+    {
+      "bufferView" : 5,
+      "normalized" : true,
+      "componentType" : 5121,
+      "count" : 3099,
+      "type" : "VEC4"
+    },
+    {
+      "bufferView" : 6,
+      "componentType" : 5123,
+      "count" : 3099,
+      "type" : "VEC4"
+    },
+    {
+      "bufferView" : 7,
+      "normalized" : true,
+      "componentType" : 5121,
+      "count" : 3099,
+      "type" : "VEC4"
+    },
+    {
+      "bufferView" : 8,
+      "componentType" : 5126,
+      "count" : 3099,
+      "type" : "VEC2"
+    },
+    {
+      "bufferView" : 9,
+      "componentType" : 5126,
+      "count" : 3099,
+      "type" : "VEC2"
+    },
+    {
+      "bufferView" : 10,
+      "componentType" : 5126,
+      "count" : 3099,
+      "type" : "VEC2"
+    },
+    {
+      "bufferView" : 11,
+      "componentType" : 5126,
+      "count" : 3099,
+      "type" : "VEC2"
+    }
+  ]
+}
