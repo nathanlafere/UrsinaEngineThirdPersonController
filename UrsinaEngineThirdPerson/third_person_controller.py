@@ -37,8 +37,12 @@ class ThirdPersonController(Entity):
 
 
     def update(self):
-        self.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]
-
+        # release cam
+        if held_keys['left alt']:
+            self.camera_pivot.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]
+        else:
+            self.camera_pivot.rotation_y = 0
+            self.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]
         self.camera_pivot.rotation_x -= mouse.velocity[1] * self.mouse_sensitivity[0]
         self.camera_pivot.rotation_x= clamp(self.camera_pivot.rotation_x, -20, 50)
 
@@ -47,9 +51,9 @@ class ThirdPersonController(Entity):
             + self.right * (held_keys['d'] - held_keys['a'])
             ).normalized()
         feet_ray = raycast(self.position+Vec3(0,0.5,0), self.direction, ignore=(self,), distance=.5, debug=False)
-        head_ray = raycast(self.position+Vec3(0,self.height-.1,0), self.direction, ignore=(self,), distance=.5, debug=False)
+        head_ray = raycast(self.position+Vec3(0,self.height-.4,0), self.direction, ignore=(self,), distance=.5, debug=False)
         chest_ray = raycast(self.position+Vec3(0,self.height/2,0), self.direction, ignore=(self,), distance=.5, debug=False)
-        if not feet_ray.hit and not head_ray.hit and not chest_ray: # depois colocar para o head não contar caso abaixado
+        if not feet_ray.hit and not head_ray.hit and not chest_ray:
             move_amount = self.direction * time.dt * self.speed
             if raycast(self.position+Vec3(-.0,1,0), Vec3(1,0,0), distance=.5, ignore=(self,)).hit:
                 move_amount[0] = min(move_amount[0], 0)
@@ -86,7 +90,6 @@ class ThirdPersonController(Entity):
     def input(self, key):
         if key == 'space':
             self.jump()
-        
         if key == 'left mouse down' and self.grounded:
             hitbox=boxcast(origin=self.position+Vec3(0,1.1,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self])
             if hitbox.hit:
