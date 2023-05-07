@@ -48,9 +48,10 @@ class Enemy(Entity):
     def choice_walk_direction(self):
         if self.combat:
             self.direction = (Vec3(getattr(self.target, "position"))-self.position).normalized()
+            self.direction[1] = 0
         else:
-            numbers = [1,-1]
-            self.direction = Vec3(self.forward * random.choice(numbers) + self.right * random.choice(numbers)).normalized()
+            possible_directions = [(1,0,1),(1,0,-1),(-1,0,1),(-1,0,-1),(0,0,-1),(0,0,+1),(-1,0,0),(1,0,0)]
+            self.direction = Vec3(random.choice(possible_directions)).normalized()
         
         
     def walk(self,range=0):

@@ -37,14 +37,16 @@ class ThirdPersonController(Entity):
 
 
     def update(self):
+        self.camera_pivot.rotation_x -= mouse.velocity[1] * self.mouse_sensitivity[0]
+        self.camera_pivot.rotation_x= clamp(self.camera_pivot.rotation_x, -20, 50)
+        camera.position = clamp(camera.position,(0,1,-6),(0,13,-18))
+        camera.rotation_x = clamp(camera.rotation_x, 7,31)
         # release cam
         if held_keys['left alt']:
             self.camera_pivot.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]
         else:
             self.camera_pivot.rotation_y = 0
             self.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]
-        self.camera_pivot.rotation_x -= mouse.velocity[1] * self.mouse_sensitivity[0]
-        self.camera_pivot.rotation_x= clamp(self.camera_pivot.rotation_x, -20, 50)
 
         self.direction = Vec3(
             self.forward * (held_keys['w'] - held_keys['s'])
@@ -88,6 +90,12 @@ class ThirdPersonController(Entity):
 
 
     def input(self, key):
+        if key == 'scroll up':
+            camera.position += (0,1,-1)
+            camera.rotation_x += 2
+        elif key == 'scroll down':
+            camera.position += (0,-1,1)
+            camera.rotation_x -= 2
         if key == 'space':
             self.jump()
         if key == 'left mouse down' and self.grounded:
