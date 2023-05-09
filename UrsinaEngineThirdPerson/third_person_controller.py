@@ -20,8 +20,12 @@ class ThirdPersonController(Entity):
         mouse.locked = True
         self.mouse_sensitivity = Vec2(40, 40)
 
+        #atributes
+        self.health = 250
+        self.attack = 3
+        self.defense = 5
+        self.invulnerable = False
         self.running = False
-        self.damage = 3
         self.gravity = 1
         self.grounded = False
         self.jump_height = 2
@@ -44,7 +48,7 @@ class ThirdPersonController(Entity):
                 self.y = ray.world_point.y
 
 
-    def update(self):        
+    def update(self):
         self.camera_pivot.rotation_x -= mouse.velocity[1] * self.mouse_sensitivity[0]
         self.camera_pivot.rotation_x= clamp(self.camera_pivot.rotation_x, -20, 50)
         camera.position = clamp(camera.position,(0,1,-6),(0,13,-18))
@@ -119,13 +123,17 @@ class ThirdPersonController(Entity):
         if key == 'left mouse down' and self.grounded:
             hitbox=boxcast(origin=self.position+Vec3(0,1.1,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self])
             if hitbox.hit:
-                self.apply_damage(hitbox.entity,self.damage*0.7)
+                self.apply_damage(hitbox.entity,self.attack*0.7)
+        
+        # Dash implements
         if key in ['w','a','s','d']:
             if key == data.last_move_button[0] and time.process_time() < data.last_move_button[1]+.4:
+                self.invulnerable = True
                 self.animate('position', self.position+Vec3(
             self.forward * (held_keys['w'] - held_keys['s'])
             + self.right * (held_keys['d'] - held_keys['a'])
             ).normalized()*time.dt*950, duration= 0.2, curve=curve.linear)
+                invoke(setattr,self,'invulnerable',False,delay=0.25)
                 self.running = True
                 data.last_move_button = (0,0,time.process_time()+4)
             elif data.last_move_button[2] == 0 or data.last_move_button[2] < time.process_time():
