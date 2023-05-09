@@ -83,6 +83,9 @@ class ThirdPersonController(Entity):
             self.y -= min(self.air_time, ray.distance-.05) * time.dt * 100
             self.air_time += time.dt * .25 * self.gravity
 
+            if self.position[1] <= -30:
+                self.position = (1,5,1)
+
 
     def input(self, key):
         if key == 'scroll down':
@@ -105,6 +108,8 @@ class ThirdPersonController(Entity):
         if self.running:
             if self.actor.getCurrentAnim() != data.player_action_running:
                 self.actor.loop(data.player_action_running)
+            if held_keys['a']*held_keys['d'] and not held_keys['w']:
+                self.actor.stop()
         else:
             self.actor.stop()
         
@@ -184,7 +189,7 @@ class ThirdPersonController(Entity):
     def rotateModel(self):
         if held_keys['w'] or held_keys['s']:
             self.actor.setH(180)
-        if held_keys['a']:
+        if held_keys['a'] and not held_keys['a']*held_keys['w']*held_keys['d']:
             self.actor.setH(270-held_keys['w']*45-held_keys['s']*135)
-        elif held_keys['d']:
+        if held_keys['d'] and not held_keys['a']*held_keys['w']*held_keys['d']:
             self.actor.setH(90+held_keys['w']*45+held_keys['s']*135)
