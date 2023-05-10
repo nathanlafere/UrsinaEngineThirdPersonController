@@ -14,6 +14,7 @@ class Enemy(Entity):
         self.combat = False
         self.height = self.scale_y
         self.collider = "box"
+        self.collider = SphereCollider(self, center=Vec3(0,0,0), radius=.2)
         self.resting = True
         self.attack_range = 0.5
         self.target = None

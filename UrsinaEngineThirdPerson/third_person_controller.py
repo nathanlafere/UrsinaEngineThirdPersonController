@@ -20,7 +20,7 @@ class ThirdPersonController(Entity):
         mouse.locked = True
         self.mouse_sensitivity = Vec2(40, 40)
 
-        #atributes
+        #attributes
         self.health = 250
         self.attack = 3
         self.defense = 5
@@ -101,7 +101,7 @@ class ThirdPersonController(Entity):
         self.rotateModel()
         
         # running system and animation
-        self.running = bool(
+        self.running = bool(              # self.actor.getCurrentAnim() != data.player_action_running_attack:
             held_keys['left shift']
             and any([held_keys['w'], held_keys['a'], held_keys['d']])
             and not held_keys['s']
@@ -121,9 +121,16 @@ class ThirdPersonController(Entity):
         if key == 'space':
             self.jump()
         if key == 'left mouse down' and self.grounded:
-            hitbox=boxcast(origin=self.position+Vec3(0,1.1,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self])
-            if hitbox.hit:
-                self.apply_damage(hitbox.entity,self.attack*0.7)
+            if self.running:
+                print(self.actor.getAnimNames())
+                print('running attack')
+                self.invulnerable = True
+                invoke(setattr,self,'invulnerable',False,delay=0.3)  #trocar o delay para o tempo da animação
+                self.running = False
+            else:
+                hitbox=boxcast(origin=self.position+Vec3(0,1.1,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self])
+                if hitbox.hit:
+                    self.apply_damage(hitbox.entity,self.attack*0.7)
         
         # Dash implements
         if key in ['w','a','s','d']:
