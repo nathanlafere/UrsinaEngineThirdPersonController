@@ -124,6 +124,7 @@ class ThirdPersonController(Entity):
             self.jump()
         if key == 'left mouse down' and self.grounded:
             if self.in_dash:
+                self.in_dash = False
                 self.invulnerable = True
                 invoke(setattr,self,'invulnerable',False,delay=0.3)
                 hitbox_foward = boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=1.8,thickness=(2,3),ignore=[self,data.ground])
@@ -135,25 +136,28 @@ class ThirdPersonController(Entity):
             else:
                 hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self,data.ground])
                 if hitbox.hit:
-                    self.apply_damage(hitbox,self.attack*0.7)
+                    self.apply_damage(hitbox.entity,self.attack*0.7)
         
         # Dash implements
         if key in ['w','a','s','d']:
-            if key == data.last_move_button[0] and time.process_time() < data.last_move_button[1]+.4:
-                self.invulnerable = True
-                self.in_dash = True
-                self.animate('position', self.position+Vec3(
-            self.forward * (held_keys['w'] - held_keys['s'])
-            + self.right * (held_keys['d'] - held_keys['a'])
-            ).normalized()*time.dt*950, duration= 0.2, curve=curve.linear)
-                invoke(setattr,self,'invulnerable',False,delay=0.25)
-                invoke(setattr,self,'in_dash',False,delay=0.25)
-                self.running = True
-                data.last_move_button = (0,0,time.process_time()+4)
+            if key == data.last_move_button[0] and time.process_time() < data.last_move_button[1]+.3:
+                self.dash()
             elif data.last_move_button[2] == 0 or data.last_move_button[2] < time.process_time():
                 data.last_move_button = (key,time.process_time(),0)
 
-
+    # dash function
+    def dash(self):
+        self.invulnerable = True
+        self.animate('position', self.position+Vec3(
+            self.forward * (held_keys['w'] - held_keys['s'])
+            + self.right * (held_keys['d'] - held_keys['a'])
+            ).normalized()*time.dt*950, duration= 0.2, curve=curve.linear)
+        invoke(setattr,self,'invulnerable',False,delay=0.2)
+        invoke(setattr,self,'in_dash',True,delay=0.17)
+        invoke(setattr,self,'in_dash',False,delay=0.27)
+        self.running = True
+        data.last_move_button = (0,0,time.process_time()+4)
+        
     # jump functions
     def jump(self):
         if not self.grounded:
