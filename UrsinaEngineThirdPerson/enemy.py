@@ -55,7 +55,7 @@ class Enemy(Entity):
             self.look_at_2d(self.target,'y')
             self.direction = (Vec3(getattr(self.target, "position"))-self.position).normalized()
             self.direction[1] = 0
-            hitbox=boxcast(origin=self.position+Vec3(0,0.6,0),direction=self.forward,distance=1.8,thickness=(1,2),ignore=[self], debug=True)
+            hitbox=boxcast(origin=self.position+Vec3(0,0.4,0),direction=self.forward,distance=1.8,thickness=(1,2),ignore=[self,data.ground])
         else:
             possible_directions = [(1,0,1),(1,0,-1),(-1,0,1),(-1,0,-1),(0,0,-1),(0,0,+1),(-1,0,0),(1,0,0)]
             self.direction = Vec3(random.choice(possible_directions)).normalized()

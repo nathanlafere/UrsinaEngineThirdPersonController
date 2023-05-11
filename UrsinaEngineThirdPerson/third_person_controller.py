@@ -24,15 +24,18 @@ class ThirdPersonController(Entity):
         self.health = 250
         self.attack = 3
         self.defense = 5
-        self.invulnerable = False
-        self.running = False
         self.gravity = 1
-        self.grounded = False
         self.jump_height = 2
         self.jump_up_duration = .5
         self.fall_after = .35
-        self.jumping = False
         self.air_time = 0
+        
+        #state
+        self.in_dash = False
+        self.jumping = False
+        self.grounded = False
+        self.invulnerable = False
+        self.running = False
 
         for key, value in kwargs.items():
             setattr(self, key ,value)
@@ -101,7 +104,7 @@ class ThirdPersonController(Entity):
         self.rotateModel()
         
         # running system and animation
-        self.running = bool(              # self.actor.getCurrentAnim() != data.player_action_running_attack:
+        self.running = bool(              # self.actor.getCurrentAnim() != data.player_action_dash_attack:
             held_keys['left shift']
             and any([held_keys['w'], held_keys['a'], held_keys['d']])
             and not held_keys['s']
@@ -117,30 +120,34 @@ class ThirdPersonController(Entity):
         else:
             self.actor.stop()
         
-        
         if key == 'space':
             self.jump()
         if key == 'left mouse down' and self.grounded:
-            if self.running:
-                print(self.actor.getAnimNames())
-                print('running attack')
+            if self.in_dash:
                 self.invulnerable = True
-                invoke(setattr,self,'invulnerable',False,delay=0.3)  #trocar o delay para o tempo da animação
-                self.running = False
+                invoke(setattr,self,'invulnerable',False,delay=0.3)
+                hitbox_foward = boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=1.8,thickness=(2,3),ignore=[self,data.ground])
+                hitbox_back = boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.back,distance=1.8,thickness=(2,3),ignore=[self,data.ground],debug=True)
+                if hitbox_foward.hit:
+                    self.apply_damage(hitbox_foward.entity,self.attack*1.2)
+                elif hitbox_back:
+                    self.apply_damage(hitbox_back.entity,self.attack*1.2)
             else:
-                hitbox=boxcast(origin=self.position+Vec3(0,1.1,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self])
+                hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self,data.ground])
                 if hitbox.hit:
-                    self.apply_damage(hitbox.entity,self.attack*0.7)
+                    self.apply_damage(hitbox,self.attack*0.7)
         
         # Dash implements
         if key in ['w','a','s','d']:
             if key == data.last_move_button[0] and time.process_time() < data.last_move_button[1]+.4:
                 self.invulnerable = True
+                self.in_dash = True
                 self.animate('position', self.position+Vec3(
             self.forward * (held_keys['w'] - held_keys['s'])
             + self.right * (held_keys['d'] - held_keys['a'])
             ).normalized()*time.dt*950, duration= 0.2, curve=curve.linear)
                 invoke(setattr,self,'invulnerable',False,delay=0.25)
+                invoke(setattr,self,'in_dash',False,delay=0.25)
                 self.running = True
                 data.last_move_button = (0,0,time.process_time()+4)
             elif data.last_move_button[2] == 0 or data.last_move_button[2] < time.process_time():
@@ -162,7 +169,7 @@ class ThirdPersonController(Entity):
     def land(self):
         self.air_time = 0
         self.grounded = True
-
+            
     #applies damage and some status changes after hitting something
     def apply_damage(self,entity,damage):
         if hasattr(entity,"health"):
