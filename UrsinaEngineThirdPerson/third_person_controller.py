@@ -8,21 +8,19 @@ class ThirdPersonController(Entity):
         self.cursor = Entity(parent=camera.ui, model='quad', color=color.pink, scale=.008, rotation_z=45)
         super().__init__()
         self.speed = 6
-        self.running_speed = 9
         self.height = 2
         self.camera_pivot = Entity(parent=self, y=self.height)
 
         camera.parent = self.camera_pivot
         camera.position = (0,10,-15)
-        camera.rotation = (25,0,0)
-        
+        camera.rotation = (25,0,0)    
         camera.fov = 90
         mouse.locked = True
         self.mouse_sensitivity = Vec2(40, 40)
 
         #attributes
         self.health = 250
-        self.attack = 3
+        self.attack = 5
         self.defense = 5
         self.gravity = 1
         self.jump_height = 2
@@ -36,6 +34,7 @@ class ThirdPersonController(Entity):
         self.grounded = False
         self.invulnerable = False
         self.running = False
+        self.cooldowns = [0,0,0]  #[0] basic attack, [1] dash, [2] spell attack
 
         for key, value in kwargs.items():
             setattr(self, key ,value)
@@ -102,9 +101,9 @@ class ThirdPersonController(Entity):
             camera.position += (0,1,-1)
             camera.rotation_x += 2
         self.rotateModel()
-        
+
         # running system and animation
-        self.running = bool(              # self.actor.getCurrentAnim() != data.player_action_dash_attack:
+        self.running = bool(
             held_keys['left shift']
             and any([held_keys['w'], held_keys['a'], held_keys['d']])
             and not held_keys['s']
@@ -119,31 +118,37 @@ class ThirdPersonController(Entity):
                 self.actor.stop()
         else:
             self.actor.stop()
-        
+
         if key == 'space':
             self.jump()
-        if key == 'left mouse down' and self.grounded:
+        if key == 'left mouse down': 
             if self.in_dash:
-                self.in_dash = False
-                self.invulnerable = True
-                invoke(setattr,self,'invulnerable',False,delay=0.3)
-                hitbox_foward = boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=1.8,thickness=(2,3),ignore=[self,data.ground])
-                hitbox_back = boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.back,distance=1.8,thickness=(2,3),ignore=[self,data.ground],debug=True)
-                if hitbox_foward.hit:
-                    self.apply_damage(hitbox_foward.entity,self.attack*1.2)
-                elif hitbox_back:
-                    self.apply_damage(hitbox_back.entity,self.attack*1.2)
-            else:
+                self.dash_attack()
+            elif self.cooldowns[0] < time.process_time():
+                self.speed -= 2
+                invoke(setattr,self,'speed',self.speed+2,delay=0.3)
+                self.cooldowns[0] = time.process_time() + 0.5
                 hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self,data.ground])
                 if hitbox.hit:
                     self.apply_damage(hitbox.entity,self.attack*0.7)
-        
+
         # Dash implements
         if key in ['w','a','s','d']:
-            if key == data.last_move_button[0] and time.process_time() < data.last_move_button[1]+.3:
+            if key == data.last_move_button[0] and time.process_time() < data.last_move_button[1]+.3 and time.process_time() > self.cooldowns[1]:
                 self.dash()
-            elif data.last_move_button[2] == 0 or data.last_move_button[2] < time.process_time():
-                data.last_move_button = (key,time.process_time(),0)
+            else:
+                data.last_move_button = (key,time.process_time())
+
+    def dash_attack(self):
+        self.in_dash = False
+        self.invulnerable = True
+        invoke(setattr,self,'invulnerable',False,delay=0.3)
+        hitbox_foward = boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=1.8,thickness=(2.5,3),ignore=[self,data.ground])
+        hitbox_back = boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.back,distance=1.8,thickness=(2.5,3),ignore=[self,data.ground])
+        if hitbox_foward.hit:
+            self.apply_damage(hitbox_foward.entity,self.attack*1.2)
+        elif hitbox_back:
+            self.apply_damage(hitbox_back.entity,self.attack*1.2)
 
     # dash function
     def dash(self):
@@ -153,10 +158,10 @@ class ThirdPersonController(Entity):
             + self.right * (held_keys['d'] - held_keys['a'])
             ).normalized()*time.dt*950, duration= 0.2, curve=curve.linear)
         invoke(setattr,self,'invulnerable',False,delay=0.2)
-        invoke(setattr,self,'in_dash',True,delay=0.17)
-        invoke(setattr,self,'in_dash',False,delay=0.27)
+        invoke(setattr,self,'in_dash',True,delay=0.18)
+        invoke(setattr,self,'in_dash',False,delay=0.3)
         self.running = True
-        data.last_move_button = (0,0,time.process_time()+4)
+        self.cooldowns[1] = time.process_time()+4
         
     # jump functions
     def jump(self):
@@ -181,7 +186,7 @@ class ThirdPersonController(Entity):
                 entity.combat = True
             if getattr(entity, "target") is None:
                 entity.target = self
-            entity.health -= damage
+            entity.health -= damage - getattr(entity, "defense")
 
     def on_enable(self):
         mouse.locked = True
@@ -200,7 +205,7 @@ class ThirdPersonController(Entity):
             return True
     
     def walk(self):
-        move_amount = self.direction * time.dt * self.running_speed if self.running else self.direction * time.dt * self.speed 
+        move_amount = self.direction * time.dt * self.speed*1.6 if self.running else self.direction * time.dt * self.speed 
         if raycast(self.position+Vec3(-.0,1,0), Vec3(1,0,0), distance=.5, ignore=(self,)).hit:
             move_amount[0] = min(move_amount[0], 0)
         if raycast(self.position+Vec3(-.0,1,0), Vec3(-1,0,0), distance=.5, ignore=(self,)).hit:

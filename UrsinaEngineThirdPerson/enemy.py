@@ -6,22 +6,27 @@ class Enemy(Entity):
     def __init__(self,health,**kwargs):
         super().__init__()
         self.position = (0,data.ground.y,0)
-        self.speed = 4
-        self.aggressive_speed = 6
-        self.health = health
-        self.aggressive = False
-        self.stuck = False
-        self.combat = False
         self.height = self.scale_y
         self.collider = "box"
         self.collider = SphereCollider(self, center=Vec3(0,0,0), radius=.2)
-        self.resting = True
-        self.attack_range = 0.5
         self.target = None
         self.rest_time, self.walk_time = 8, 5
         self.time_rested, self.walked_time  = 0, 0
         for key, value in kwargs.items():
             setattr(self, key ,value)
+            
+        #attributes
+        self.health = health
+        self.defense = 1
+        self.speed = 4
+        self.aggressive_speed = 6
+        self.aggressive = False
+        self.attack_range = 0.5
+        
+        #state
+        self.stuck = False
+        self.combat = False
+        self.resting = True
 
     def update(self):
         if not self.stuck:
