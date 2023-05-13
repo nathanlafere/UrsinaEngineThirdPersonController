@@ -116,7 +116,7 @@ class ThirdPersonController(Entity):
                 self.actor.loop(data.player_action_running)
             if held_keys['a']*held_keys['d'] and not held_keys['w']:
                 self.actor.stop()
-        else:
+        elif self.actor.getCurrentAnim() == "JinxRigAction.1":
             self.actor.stop()
 
         if key == 'space':
@@ -139,17 +139,19 @@ class ThirdPersonController(Entity):
                 data.last_move_button = (key,time.process_time())
 
     def combo_attack(self):
-        if data.last_attack_button[2] == 2:
-            self.animate('position', self.position+Vec3(self.forward).normalized()*time.dt*950, duration= 0.2, curve=curve.linear)
-            hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=4.8,thickness=(2,3),ignore=[self,data.ground], debug=True)
-        else:
-            hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self,data.ground], debug=True)
-        if hitbox.hit:
-            self.apply_damage(hitbox.entity,self.attack*0.7)
         if time.process_time() < data.last_attack_button[1]+1 and data.last_attack_button[2] < 2 or data.last_attack_button[1] == 0:
             data.last_attack_button = ['left mouse down',time.process_time(),data.last_attack_button[2]+1]
         else:
             data.last_attack_button = ['left mouse down',time.process_time(),0]
+        if data.last_attack_button[2] == 2:
+            self.animate('position', self.position+Vec3(self.forward).normalized()*7, duration= 0.2, curve=curve.linear)
+            hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=4.8,thickness=(2,3),ignore=[self,data.ground], debug=True)
+            self.actor.play(data.player_actions_combo[2])
+        else:
+            hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self,data.ground], debug=True)
+            self.actor.play(data.player_actions_combo[data.last_attack_button[2]])
+        if hitbox.hit:
+            self.apply_damage(hitbox.entity,self.attack*0.7+ data.last_attack_button[2]*1.30)
     
     def dash_attack(self):
         self.in_dash = False
@@ -168,7 +170,7 @@ class ThirdPersonController(Entity):
         self.animate('position', self.position+Vec3(
             self.forward * (held_keys['w'] - held_keys['s'])
             + self.right * (held_keys['d'] - held_keys['a'])
-            ).normalized()*time.dt*950, duration= 0.2, curve=curve.linear)
+            ).normalized()*9.5, duration= 0.2, curve=curve.linear)
         invoke(setattr,self,'invulnerable',False,delay=0.2)
         invoke(setattr,self,'in_dash',True,delay=0.18)
         invoke(setattr,self,'in_dash',False,delay=0.3)
