@@ -5,8 +5,6 @@ import third_person_controller
 
 app = Ursina()
 
-def update():
-    print(getattr(player,'speed'))
     
 def input(key):
     if key == 'escape':

@@ -121,16 +121,15 @@ class ThirdPersonController(Entity):
 
         if key == 'space':
             self.jump()
-        if key == 'left mouse down': 
+        if key == 'left mouse down':
             if self.in_dash:
                 self.dash_attack()
             elif self.cooldowns[0] < time.process_time():
-                self.speed -= 2
-                invoke(setattr,self,'speed',self.speed+2,delay=0.3)
+                if self.running:
+                    self.speed -= 1.5
+                    invoke(setattr,self,'speed',self.speed+1.5,delay=0.2)
                 self.cooldowns[0] = time.process_time() + 0.5
-                hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self,data.ground])
-                if hitbox.hit:
-                    self.apply_damage(hitbox.entity,self.attack*0.7)
+                self.combo_attack()
 
         # Dash implements
         if key in ['w','a','s','d']:
@@ -139,6 +138,19 @@ class ThirdPersonController(Entity):
             else:
                 data.last_move_button = (key,time.process_time())
 
+    def combo_attack(self):
+        if data.last_attack_button[2] == 2:
+            self.animate('position', self.position+Vec3(self.forward).normalized()*time.dt*950, duration= 0.2, curve=curve.linear)
+            hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=4.8,thickness=(2,3),ignore=[self,data.ground], debug=True)
+        else:
+            hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self,data.ground], debug=True)
+        if hitbox.hit:
+            self.apply_damage(hitbox.entity,self.attack*0.7)
+        if time.process_time() < data.last_attack_button[1]+1 and data.last_attack_button[2] < 2 or data.last_attack_button[1] == 0:
+            data.last_attack_button = ['left mouse down',time.process_time(),data.last_attack_button[2]+1]
+        else:
+            data.last_attack_button = ['left mouse down',time.process_time(),0]
+    
     def dash_attack(self):
         self.in_dash = False
         self.invulnerable = True
@@ -147,7 +159,7 @@ class ThirdPersonController(Entity):
         hitbox_back = boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.back,distance=1.8,thickness=(2.5,3),ignore=[self,data.ground])
         if hitbox_foward.hit:
             self.apply_damage(hitbox_foward.entity,self.attack*1.2)
-        elif hitbox_back:
+        elif hitbox_back.hit:
             self.apply_damage(hitbox_back.entity,self.attack*1.2)
 
     # dash function
