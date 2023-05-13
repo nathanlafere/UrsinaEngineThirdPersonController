@@ -145,10 +145,10 @@ class ThirdPersonController(Entity):
             data.last_attack_button = ['left mouse down',time.process_time(),0]
         if data.last_attack_button[2] == 2:
             self.animate('position', self.position+Vec3(self.forward).normalized()*7, duration= 0.2, curve=curve.linear)
-            hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=4.8,thickness=(2,3),ignore=[self,data.ground], debug=True)
+            hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=4.8,thickness=(2,3),ignore=[self,data.ground])
             self.actor.play(data.player_actions_combo[2])
         else:
-            hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self,data.ground], debug=True)
+            hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self,data.ground])
             self.actor.play(data.player_actions_combo[data.last_attack_button[2]])
         if hitbox.hit:
             self.apply_damage(hitbox.entity,self.attack*0.7+ data.last_attack_button[2]*1.30)
@@ -200,7 +200,8 @@ class ThirdPersonController(Entity):
                 entity.combat = True
             if getattr(entity, "target") is None:
                 entity.target = self
-            entity.health -= damage - getattr(entity, "defense")
+            if not getattr(entity,"invulnerable"):
+                entity.health -= damage - getattr(entity, "defense")
 
     def on_enable(self):
         mouse.locked = True
@@ -212,9 +213,9 @@ class ThirdPersonController(Entity):
     
     #confirm that it won't hit anything
     def check_raycast(self,range=0):
-        feet_ray = raycast(self.position+Vec3(0,0.5,0), self.direction, ignore=(self,), distance=.5, debug=False)
-        head_ray = raycast(self.position+Vec3(0,self.height-.4,0), self.direction, ignore=(self,), distance=.5, debug=False)
-        chest_ray = raycast(self.position+Vec3(0,self.height/2,0), self.direction, ignore=(self,), distance=.5, debug=False)
+        feet_ray = raycast(self.position+Vec3(0,0.5,0), self.direction, ignore=(self,), distance=.5)
+        head_ray = raycast(self.position+Vec3(0,self.height-.4,0), self.direction, ignore=(self,), distance=.5)
+        chest_ray = raycast(self.position+Vec3(0,self.height/2,0), self.direction, ignore=(self,), distance=.5)
         if not feet_ray.hit and not head_ray.hit and not chest_ray:
             return True
     
