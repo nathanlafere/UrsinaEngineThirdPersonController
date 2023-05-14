@@ -21,7 +21,7 @@ class ThirdPersonController(Entity):
         #attributes
         self.health = 250
         self.attack = 5
-        self.defense = 5
+        self.defense = 1
         self.gravity = 1
         self.jump_height = 2
         self.jump_up_duration = .5
@@ -114,7 +114,7 @@ class ThirdPersonController(Entity):
         if self.running:
             if self.actor.getCurrentAnim() != data.player_action_running:
                 self.actor.loop(data.player_action_running)
-            if held_keys['a']*held_keys['d'] and not held_keys['w']:
+            if held_keys['a']*held_keys['d'] and not held_keys['w'] and self.actor.getCurrentAnim() == "JinxRigAction.1":
                 self.actor.stop()
         elif self.actor.getCurrentAnim() == "JinxRigAction.1":
             self.actor.stop()
