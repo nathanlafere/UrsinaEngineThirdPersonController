@@ -40,18 +40,13 @@ class Enemy(Entity):
         self.actor.reparentTo(self)
 
     def update(self):
-        
-        
-        print(self.actor.getAnimNames(),self.actor.getCurrentFrame())
-                
-                
-        if self.actor.get_current_anim() == "Attack_Action" and self.actor.getCurrentFrame("Attack_Action") >= 28 and not self.already_reached:
+        if self.actor.get_current_anim() == "enemy_action_attack" and self.actor.getCurrentFrame("enemy_action_attack") >= 28 and not self.already_reached:
                 hitbox=boxcast(origin=self.position+Vec3(0,0.4,0),direction=self.forward,distance=.5+self.attack_range,thickness=(1,2),ignore=[self,data.ground],debug=True)
                 if hitbox.hit:
                     self.already_reached = True
                     self.apply_damage(hitbox.entity,self.attack)
         if not self.stuck:
-            if self.combat:
+            if self.combat and self.actor.get_current_anim() != 'enemy_action_attack':
                 self.choice_walk_direction()
                 self.raycast_walk(self.attack_range)
             else:
@@ -95,10 +90,10 @@ class Enemy(Entity):
     def raycast_walk(self,range=0):
         feet_ray = raycast(self.position+Vec3(0,0.2,0), self.direction, ignore=(self,), distance=.5+range)
         head_ray = raycast(self.position+Vec3(0,self.height-.1,0), self.direction, ignore=(self,), distance=.5+range)
-        if feet_ray and self.actor.get_current_anim() != 'Attack_Action' or head_ray and self.actor.get_current_anim() != 'Attack_Action':
-            self.actor.play('Attack_Action')
+        if feet_ray and self.actor.get_current_anim() != 'enemy_action_attack' or head_ray and self.actor.get_current_anim() != 'enemy_action_attack':
+            self.actor.play('enemy_action_attack')
             self.already_reached = False
-        if not feet_ray.hit and not head_ray.hit and self.actor.get_current_anim() != "Attack_Action":
+        if not feet_ray.hit and not head_ray.hit and self.actor.get_current_anim() != "enemy_action_attack":
             self.walk()
 
     def walk(self):
