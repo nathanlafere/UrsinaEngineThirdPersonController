@@ -7,6 +7,7 @@ class ThirdPersonController(Entity):
     def __init__(self, **kwargs):
         self.cursor = Entity(parent=camera.ui, model='quad', color=color.pink, scale=.008, rotation_z=45)
         super().__init__()
+        self.collider = "box"
         self.speed = 6
         self.height = 2
         self.camera_pivot = Entity(parent=self, y=self.height)

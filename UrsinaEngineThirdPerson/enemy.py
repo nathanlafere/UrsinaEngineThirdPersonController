@@ -5,11 +5,11 @@ from panda3d import *
 from direct.actor.Actor import Actor
 
 class Enemy(Entity):
-    def __init__(self,health,actor_model,**kwargs):
+    def __init__(self,health,actor_model,position,**kwargs):
         super().__init__()
-        self.position = (0,data.ground.y,0)
+        self.position = position
+        self.y = data.ground.y
         self.height = self.scale_y
-        self.collider = "box"
         self.collider = SphereCollider(self, center=Vec3(0,0,0), radius=.2)
         self.target = None
         self.rest_time, self.walk_time = 8, 5
