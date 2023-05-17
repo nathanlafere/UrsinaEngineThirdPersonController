@@ -3,24 +3,24 @@ import data
 from panda3d import *
 from direct.actor.Actor import Actor
 
-class ThirdPersonController(Entity):
+class ThirdPersonController(Entity,data.Character):
     def __init__(self, **kwargs):
         self.cursor = Entity(parent=camera.ui, model='quad', color=color.pink, scale=.008, rotation_z=45)
         super().__init__()
+        data.Character.__init__(self)
         self.collider = "box"
-        self.speed = 6
         self.height = 2
         self.camera_pivot = Entity(parent=self, y=self.height)
 
         camera.parent = self.camera_pivot
         camera.position = (0,10,-15)
-        camera.rotation = (25,0,0)    
+        camera.rotation = (25,0,0)
         camera.fov = 90
         mouse.locked = True
         self.mouse_sensitivity = Vec2(40, 40)
+        
 
         #attributes
-        self.health = 250
         self.attack = 5
         self.defense = 1
         self.gravity = 1
@@ -33,7 +33,6 @@ class ThirdPersonController(Entity):
         self.in_dash = False
         self.jumping = False
         self.grounded = False
-        self.invulnerable = False
         self.running = False
         self.cooldowns = [0,0,0]  #[0] basic attack, [1] dash, [2] spell attack
 
@@ -221,7 +220,7 @@ class ThirdPersonController(Entity):
             return True
     
     def walk(self):
-        move_amount = self.direction * time.dt * self.speed*1.6 if self.running else self.direction * time.dt * self.speed 
+        move_amount = self.direction * time.dt * self.speed*1.7 if self.running else self.direction * time.dt * self.speed 
         if raycast(self.position+Vec3(-.0,1,0), Vec3(1,0,0), distance=.5, ignore=(self,)).hit:
             move_amount[0] = min(move_amount[0], 0)
         if raycast(self.position+Vec3(-.0,1,0), Vec3(-1,0,0), distance=.5, ignore=(self,)).hit:
