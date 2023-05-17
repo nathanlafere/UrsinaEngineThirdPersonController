@@ -196,8 +196,8 @@ class ThirdPersonController(Entity,data.Character):
     #applies damage and some status changes after hitting something
     def apply_damage(self,entity,damage):
         if hasattr(entity,"health"):
-            if not getattr(entity,"combat"):
-                entity.combat = True
+            if not getattr(entity,"in_combat"):
+                entity.in_combat = True
             if getattr(entity, "target") is None:
                 entity.target = self
             if not getattr(entity,"invulnerable"):

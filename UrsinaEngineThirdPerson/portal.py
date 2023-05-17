@@ -20,8 +20,8 @@ class Portal(Entity):
             
     
     def update(self):
-        hitbox_2 = boxcast(Vec3(self.exit_position)+(0,2,0), direction=(0,0,1), distance=0.3, thickness=(4,4), traverse_target=scene, ignore=(data.ground,self), debug=True)
-        hitbox_1 = boxcast(self.position+(0,2,0), direction=(0,0,1), distance=0.3, thickness=(4,4), traverse_target=scene, ignore=(data.ground,self), debug=True)
+        hitbox_2 = boxcast(Vec3(self.exit_position)+(0,2,0), direction=(0,0,1), distance=0.3, thickness=(4,4), traverse_target=scene, ignore=(data.ground,self))
+        hitbox_1 = boxcast(self.position+(0,2,0), direction=(0,0,1), distance=0.3, thickness=(4,4), traverse_target=scene, ignore=(data.ground,self))
         if hitbox_1.hit:
             if hasattr(hitbox_1.entity,"health"):
                 setattr(hitbox_1.entity,"position",Vec3(self.exit_position)+(0,0,3))
