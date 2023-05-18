@@ -8,7 +8,6 @@ class ThirdPersonController(Entity,data.Character):
         self.cursor = Entity(parent=camera.ui, model='quad', color=color.pink, scale=.008, rotation_z=45)
         super().__init__()
         data.Character.__init__(self)
-        self.collider = "box"
         self.height = 2
         self.camera_pivot = Entity(parent=self, y=self.height)
 
@@ -27,7 +26,6 @@ class ThirdPersonController(Entity,data.Character):
         self.jump_height = 2
         self.jump_up_duration = .5
         self.fall_after = .35
-        self.air_time = 0
         
         #state
         self.in_dash = False
@@ -35,14 +33,16 @@ class ThirdPersonController(Entity,data.Character):
         self.grounded = False
         self.running = False
         self.cooldowns = [0,0,0]  #[0] basic attack, [1] dash, [2] spell attack
-
+        self.air_time = 0
+        
         for key, value in kwargs.items():
             setattr(self, key ,value)
 
         self.actor = Actor(data.player_model)
         self.actor.setH(180)
         self.actor.reparentTo(self)
-
+        self.collider = "box"
+        
         # make sure we don't fall through the ground if we start inside it
         if self.gravity:
             ray = raycast(self.world_position+(0,self.height,0), self.down, ignore=(self,))
