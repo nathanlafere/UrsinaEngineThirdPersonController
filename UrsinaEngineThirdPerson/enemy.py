@@ -23,7 +23,7 @@ class Enemy(Entity,data.Character):
         self.defense = 1
         self.attack = 3
         self.aggressive = False
-        self.attack_range = 1.3
+        self.attack_range = [.3,1.7]
         self.gravity = 1
         
         #state
@@ -50,11 +50,11 @@ class Enemy(Entity,data.Character):
 
     def update(self):
         if self.actor.get_current_anim() == "enemy_action_attack" and self.actor.getCurrentFrame("enemy_action_attack") >= 28 and not self.already_reached:
-                hitbox=boxcast(origin=self.position+Vec3(0,0.4,0),direction=self.forward,distance=.5+self.attack_range,thickness=(1,2),ignore=[self,data.ground])
-                if hitbox.hit:
-                    self.already_reached = True
-                    self.apply_damage(hitbox.entity,self.attack)
-
+            atq_hitbox = boxcast(origin=self.position+Vec3(0,0.4,0), direction=self.forward, distance=sum(self.attack_range), thickness=(1,1.5),ignore=list(Enemy.__refs__['enemys'])+[data.ground,])
+            if atq_hitbox.hit:
+                self.already_reached = True
+                self.apply_damage(atq_hitbox.entity,self.attack)
+        
         if not self.stuck:
             self.behavior_control()
         
@@ -65,8 +65,6 @@ class Enemy(Entity,data.Character):
         
         if self.gravity:
             self.apply_gravity()
-        
-        
 
 
     def choice_walk_direction(self):
@@ -84,8 +82,8 @@ class Enemy(Entity,data.Character):
 
 
     def raycast_walk(self,range=0):
-        feet_ray = raycast(self.position+Vec3(0,0.2,0), self.direction, ignore=list(Enemy.__refs__['enemys']), distance=.5+range)   ####
-        head_ray = raycast(self.position+Vec3(0,self.height-.1,0), self.direction, ignore=list(Enemy.__refs__['enemys']), distance=.5+range)   ####
+        feet_ray = raycast(self.position+Vec3(0,0.2,0), self.direction, ignore=list(Enemy.__refs__['enemys']), distance=.2+range)
+        head_ray = raycast(self.position+Vec3(0,self.height-.1,0), self.direction, ignore=list(Enemy.__refs__['enemys']), distance=.2+range)
         if feet_ray.hit or head_ray.hit:
             if self.in_combat and any((hasattr(feet_ray.entity,'health'), hasattr(head_ray.entity,'health'))):
                 if self.actor.get_current_anim() != "enemy_action_attack":
@@ -136,7 +134,7 @@ class Enemy(Entity,data.Character):
     def behavior_control(self):
         if self.in_combat and self.actor.get_current_anim() != 'enemy_action_attack':
             self.choice_walk_direction()
-            self.raycast_walk(self.attack_range)
+            self.raycast_walk(self.attack_range[0])
         else:
             if self.aggressive:
                 self.find_target()
