@@ -1,3 +1,4 @@
+from collections import defaultdict
 from ursina import *
 import random
 import data
@@ -6,11 +7,11 @@ from direct.actor.Actor import Actor
 
     
 class Enemy(Entity,data.Character):
-    instances = []
+    __refs__ = defaultdict(list)
     def __init__(self,actor_model,position,**kwargs):
         super().__init__()
         data.Character.__init__(self)
-        self.__class__.instances.append(self)
+        self.__refs__['enemys'].append(self)
         self.position = position
         self.y = data.ground.y
         self.height = self.scale_y
@@ -48,7 +49,6 @@ class Enemy(Entity,data.Character):
                 self.y = ray.world_point.y
 
     def update(self):
-        #print(self.__class__.instances)
         if self.actor.get_current_anim() == "enemy_action_attack" and self.actor.getCurrentFrame("enemy_action_attack") >= 28 and not self.already_reached:
                 hitbox=boxcast(origin=self.position+Vec3(0,0.4,0),direction=self.forward,distance=.5+self.attack_range,thickness=(1,2),ignore=[self,data.ground])
                 if hitbox.hit:
@@ -84,8 +84,8 @@ class Enemy(Entity,data.Character):
 
 
     def raycast_walk(self,range=0):
-        feet_ray = raycast(self.position+Vec3(0,0.2,0), self.direction, ignore=(self.__class__.instances), distance=.5+range)
-        head_ray = raycast(self.position+Vec3(0,self.height-.1,0), self.direction, ignore=(self.__class__.instances), distance=.5+range)
+        feet_ray = raycast(self.position+Vec3(0,0.2,0), self.direction, ignore=list(Enemy.__refs__['enemys']), distance=.5+range)   ####
+        head_ray = raycast(self.position+Vec3(0,self.height-.1,0), self.direction, ignore=list(Enemy.__refs__['enemys']), distance=.5+range)   ####
         if feet_ray.hit or head_ray.hit:
             if self.in_combat and any((hasattr(feet_ray.entity,'health'), hasattr(head_ray.entity,'health'))):
                 if self.actor.get_current_anim() != "enemy_action_attack":
@@ -107,7 +107,7 @@ class Enemy(Entity,data.Character):
         self.grounded = True
 
     def apply_gravity(self):
-        ray = raycast(self.world_position+(0,self.height,0), self.down, ignore=(self.__class__.instances))
+        ray = raycast(self.world_position+(0,self.height,0), self.down, ignore=list(Enemy.__refs__['enemys']))  ###
         if ray.distance <= self.height+.1:
             if not self.grounded:
                 self.land()
@@ -156,4 +156,3 @@ class Enemy(Entity,data.Character):
             elif not self.resting:
                 self.walked_time -= 1*time.dt
                 self.raycast_walk()
-    
