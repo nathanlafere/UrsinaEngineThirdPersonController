@@ -15,5 +15,6 @@ class Character():
         self.luk = 5
         self.speed = 4
         self.health = 60
-        
+
         self.invulnerable = False
+        

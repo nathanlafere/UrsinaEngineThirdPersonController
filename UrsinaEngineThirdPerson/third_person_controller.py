@@ -52,7 +52,7 @@ class ThirdPersonController(Entity,data.Character):
 
     def update(self):
         self.camera_pivot.rotation_x -= mouse.velocity[1] * self.mouse_sensitivity[0]
-        self.camera_pivot.rotation_x= clamp(self.camera_pivot.rotation_x, -20, 50)
+        self.camera_pivot.rotation_x = clamp(self.camera_pivot.rotation_x, -20, 50)
         camera.position = clamp(camera.position,(0,1,-6),(0,13,-18))
         camera.rotation_x = clamp(camera.rotation_x, 7,31)
         # release cam
@@ -66,6 +66,8 @@ class ThirdPersonController(Entity,data.Character):
             self.forward * (held_keys['w'] - held_keys['s'])
             + self.right * (held_keys['d'] - held_keys['a'])
             ).normalized()
+        if mouse.moving and self.direction == 0 and self.actor.getH != 180:
+            self.actor.setH(180)
         if self.check_raycast():
             self.walk()
 
@@ -172,7 +174,7 @@ class ThirdPersonController(Entity,data.Character):
             + self.right * (held_keys['d'] - held_keys['a'])
             ).normalized()*9.5, duration= 0.2, curve=curve.linear)
         invoke(setattr,self,'invulnerable',False,delay=0.2)
-        invoke(setattr,self,'in_dash',True,delay=0.18)
+        invoke(setattr,self,'in_dash',True,delay=0.15)
         invoke(setattr,self,'in_dash',False,delay=0.3)
         self.running = True
         self.cooldowns[1] = time.process_time()+4
@@ -233,9 +235,13 @@ class ThirdPersonController(Entity,data.Character):
             
     #Rotate de character model
     def rotateModel(self):
+        angle = None
         if held_keys['w'] or held_keys['s']:
-            self.actor.setH(180)
+            angle = 180
         if held_keys['a'] and not held_keys['a']*held_keys['w']*held_keys['d']:
-            self.actor.setH(270-held_keys['w']*45-held_keys['s']*135)
+            angle = (270-held_keys['w']*45-held_keys['s']*135)
         if held_keys['d'] and not held_keys['a']*held_keys['w']*held_keys['d']:
-            self.actor.setH(90+held_keys['w']*45+held_keys['s']*135)
+            angle = (90+held_keys['w']*45+held_keys['s']*135)
+        if angle != None:
+            self.actor.setH(angle)
+            angle = None
