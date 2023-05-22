@@ -23,7 +23,7 @@ class Enemy(Entity,data.Character):
         self.defense = 1
         self.attack = 3
         self.aggressive = False
-        self.attack_range = [.3,1.7]
+        self.attack_ranges = [.3,1.7]  # [0]range to attack  [1]attack range
         self.gravity = 1
         
         #state
@@ -50,7 +50,7 @@ class Enemy(Entity,data.Character):
 
     def update(self):
         if self.actor.get_current_anim() == "enemy_action_attack" and self.actor.getCurrentFrame("enemy_action_attack") >= 28 and not self.already_reached:
-            atq_hitbox = boxcast(origin=self.position+Vec3(0,0.4,0), direction=self.forward, distance=sum(self.attack_range), thickness=(1,1.5),ignore=list(Enemy.__refs__['enemys'])+[data.ground,])
+            atq_hitbox = boxcast(origin=self.position+Vec3(0,0.4,0), direction=self.forward, distance=sum(self.attack_ranges), thickness=(1,1.5),ignore=list(Enemy.__refs__['enemys'])+[data.ground,])
             if atq_hitbox.hit:
                 self.already_reached = True
                 self.apply_damage(atq_hitbox.entity,self.attack)
@@ -134,7 +134,7 @@ class Enemy(Entity,data.Character):
     def behavior_control(self):
         if self.in_combat and self.actor.get_current_anim() != 'enemy_action_attack':
             self.choice_walk_direction()
-            self.raycast_walk(self.attack_range[0])
+            self.raycast_walk(self.attack_ranges[0])
         else:
             if self.aggressive:
                 self.find_target()
