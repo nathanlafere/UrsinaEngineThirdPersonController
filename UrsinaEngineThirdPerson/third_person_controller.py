@@ -41,7 +41,7 @@ class ThirdPersonController(Entity,data.Character):
         self.actor = Actor(data.player_model)
         self.actor.setH(180)
         self.actor.reparentTo(self)
-        self.collider = "box"
+        self.collider = BoxCollider(self,center=Vec3(0,0.85,0),size=(1,1.75,1))
         
         # make sure we don't fall through the ground if we start inside it
         if self.gravity:
