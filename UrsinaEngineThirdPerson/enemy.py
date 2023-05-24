@@ -40,7 +40,7 @@ class Enemy(Entity,data.Character):
         self.actor_model = actor_model
         self.actor = Actor(self.actor_model)
         self.actor.reparentTo(self)
-        self.collider = MeshCollider(self,self.actor,center=Vec3(0,0,0))
+        self.collider = SphereCollider(self,center=(0,0,0),radius=0.2)
         
         # make sure we don't fall through the ground if we start inside it
         if self.gravity:
