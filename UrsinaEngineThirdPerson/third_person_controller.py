@@ -51,7 +51,6 @@ class ThirdPersonController(Entity,data.Character):
 
 
     def update(self):
-        print(self.cooldowns[0])
         if held_keys['a']+held_keys['d']+held_keys['w']+held_keys['s']:
             self.rotateModel()
             self.move_animation()
@@ -136,6 +135,7 @@ class ThirdPersonController(Entity,data.Character):
                 self.actor.loop('idle')
 
     def combo_attack(self):
+        self.actor.play('attack')
         if time.process_time() < data.last_attack_button[1]+1+self.cooldowns[0] and data.last_attack_button[2] < 2 or data.last_attack_button[1] == 0:
             data.last_attack_button = ['left mouse down',time.process_time(),data.last_attack_button[2]+1]
         else:
@@ -207,7 +207,7 @@ class ThirdPersonController(Entity,data.Character):
         self.cursor.enabled = False
     
     #confirm that it won't hit anything
-    def check_raycast(self,range=0):
+    def check_raycast(self):
         feet_ray = raycast(self.position+Vec3(0,0.5,0), self.direction, ignore=(self,), distance=.5)
         head_ray = raycast(self.position+Vec3(0,self.height-.4,0), self.direction, ignore=(self,), distance=.5)
         chest_ray = raycast(self.position+Vec3(0,self.height/2,0), self.direction, ignore=(self,), distance=.5)
