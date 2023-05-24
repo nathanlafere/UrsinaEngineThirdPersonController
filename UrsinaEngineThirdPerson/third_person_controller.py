@@ -51,6 +51,7 @@ class ThirdPersonController(Entity,data.Character):
 
 
     def update(self):
+        print(self.cooldowns[0])
         if held_keys['a']+held_keys['d']+held_keys['w']+held_keys['s']:
             self.rotateModel()
             self.move_animation()
@@ -114,7 +115,7 @@ class ThirdPersonController(Entity,data.Character):
                 if self.running:
                     self.speed -= 1.5
                     invoke(setattr,self,'speed',self.speed+1.5,delay=0.2)
-                self.cooldowns[0] = time.process_time() + 0.5
+                self.cooldowns[0] = time.process_time() + 80*time.dt
                 self.combo_attack()
         self.running = bool(
             held_keys['left shift']
@@ -135,17 +136,15 @@ class ThirdPersonController(Entity,data.Character):
                 self.actor.loop('idle')
 
     def combo_attack(self):
-        if time.process_time() < data.last_attack_button[1]+1 and data.last_attack_button[2] < 2 or data.last_attack_button[1] == 0:
+        if time.process_time() < data.last_attack_button[1]+1+self.cooldowns[0] and data.last_attack_button[2] < 2 or data.last_attack_button[1] == 0:
             data.last_attack_button = ['left mouse down',time.process_time(),data.last_attack_button[2]+1]
         else:
             data.last_attack_button = ['left mouse down',time.process_time(),0]
         if data.last_attack_button[2] == 2:
-            self.animate('position', self.position+Vec3(self.forward).normalized()*7, duration= 0.2, curve=curve.linear)
+            self.animate('position', self.position+Vec3(self.back).normalized()*2, duration= 0.2, curve=curve.linear)
             hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=4.8,thickness=(2,3),ignore=[self,data.ground])
-            self.actor.play('attack_right')
         else:
-            hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self,data.ground])
-            self.actor.play('attack')
+            hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self,data.ground], debug= True)
         if hitbox.hit:
             self.apply_damage(hitbox.entity,self.attack*0.7+ data.last_attack_button[2]*1.30)
     
@@ -229,8 +228,14 @@ class ThirdPersonController(Entity,data.Character):
             
     #Rotate de character model
     def rotateModel(self):
-        if self.actor.getCurrentAnim() in ['attack_back', 'attack', 'attack_left', 'attack_forward', 'attack_right']:
-            print('attack')
+        if self.actor.getCurrentAnim() in [
+            'attack_back',
+            'attack',
+            'attack_left',
+            'attack_forward',
+            'attack_right',
+        ]:
+            self.actor.setH(180)
         else:
             angle = None
             if held_keys['w'] or held_keys['s']:
@@ -241,11 +246,13 @@ class ThirdPersonController(Entity,data.Character):
                 angle = (90+held_keys['w']*45+held_keys['s']*135)
             if angle != None:
                 self.actor.setH(angle)
-                angle = None
             
     def move_animation(self):
+        orientation = (held_keys['w']*'w'+held_keys['s']*'s'+held_keys['a']*'a'+held_keys['d']*'d')[0]
         if self.actor.getCurrentAnim() in ['attack_back', 'attack', 'attack_left', 'attack_forward', 'attack_right']:
-            print('attack')
+            
+            if self.actor.getCurrentAnim() != data.animation_attack[orientation]:
+                self.actor.play(data.animation_attack[orientation],fromFrame=self.actor.getCurrentFrame())
         elif held_keys['s'] and not held_keys['w']:
             if self.actor.getCurrentAnim() != "walk_back" and not self.running:
                 self.actor.loop("walk_back")
