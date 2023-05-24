@@ -51,6 +51,9 @@ class ThirdPersonController(Entity,data.Character):
 
 
     def update(self):
+        if held_keys['a']+held_keys['d']+held_keys['w']+held_keys['s']:
+            self.rotateModel()
+            self.move_animation()
         self.camera_pivot.rotation_x -= mouse.velocity[1] * self.mouse_sensitivity[0]
         self.camera_pivot.rotation_x = clamp(self.camera_pivot.rotation_x, -20, 50)
         camera.position = clamp(camera.position,(0,1,-6),(0,13,-18))
@@ -102,8 +105,6 @@ class ThirdPersonController(Entity,data.Character):
         elif key == 'scroll up':
             camera.position += (0,1,-1)
             camera.rotation_x += 2
-        self.rotateModel()
-        
         if key == 'space':
             self.jump()
         if key == 'left mouse down':
@@ -115,25 +116,23 @@ class ThirdPersonController(Entity,data.Character):
                     invoke(setattr,self,'speed',self.speed+1.5,delay=0.2)
                 self.cooldowns[0] = time.process_time() + 0.5
                 self.combo_attack()
-        
         self.running = bool(
             held_keys['left shift']
-            and any([held_keys['w'], held_keys['a'], held_keys['d']])
+            and held_keys['w']+ held_keys['a']+ held_keys['d']
             and not held_keys['s']
             or self.running
-            and any([held_keys['w'], held_keys['a'], held_keys['d']])
+            and held_keys['w']+ held_keys['a']+ held_keys['d']
             and not held_keys['s']
         )
-        #self.move_animation(key)
         if key in ['w','a','s','d']:
             # Dash implements
             if key == data.last_move_button[0] and time.process_time() < data.last_move_button[1]+.3 and time.process_time() > self.cooldowns[1]:
                 self.dash()
             else:
                 data.last_move_button = (key,time.process_time())
-        '''if held_keys['a']*held_keys['d'] and not any([held_keys['w'],held_keys['s']]) or not any([held_keys['w'],held_keys['a'],held_keys['d'],held_keys['s']]) :
-            if self.actor.getCurrentAnim() != "idle":
-                self.actor.loop('idle')'''
+        if held_keys['a']*held_keys['d'] and not any([held_keys['w'],held_keys['s']]) or not any([held_keys['w'],held_keys['a'],held_keys['d'],held_keys['s']]) :
+            if self.actor.getCurrentAnim() not in ['attack_back', 'attack', 'attack_left', 'attack_forward', 'attack_right', 'idle']:
+                self.actor.loop('idle')
 
     def combo_attack(self):
         if time.process_time() < data.last_attack_button[1]+1 and data.last_attack_button[2] < 2 or data.last_attack_button[1] == 0:
@@ -143,10 +142,10 @@ class ThirdPersonController(Entity,data.Character):
         if data.last_attack_button[2] == 2:
             self.animate('position', self.position+Vec3(self.forward).normalized()*7, duration= 0.2, curve=curve.linear)
             hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=4.8,thickness=(2,3),ignore=[self,data.ground])
-            self.actor.play('attack_forward')
+            self.actor.play('attack_right')
         else:
             hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self,data.ground])
-            self.actor.play('attack_back')
+            self.actor.play('attack')
         if hitbox.hit:
             self.apply_damage(hitbox.entity,self.attack*0.7+ data.last_attack_button[2]*1.30)
     
@@ -230,19 +229,28 @@ class ThirdPersonController(Entity,data.Character):
             
     #Rotate de character model
     def rotateModel(self):
-        angle = None
-        if held_keys['w'] or held_keys['s']:
-            angle = 180
-        if held_keys['a'] and not held_keys['a']*held_keys['d']:
-            angle = (270-held_keys['w']*45-held_keys['s']*135)
-        if held_keys['d'] and not held_keys['a']*held_keys['d']:
-            angle = (90+held_keys['w']*45+held_keys['s']*135)
-        if angle != None:
-            self.actor.setH(angle)
+        if self.actor.getCurrentAnim() in ['attack_back', 'attack', 'attack_left', 'attack_forward', 'attack_right']:
+            print('attack')
+        else:
             angle = None
+            if held_keys['w'] or held_keys['s']:
+                angle = 180
+            if held_keys['a'] and not held_keys['a']*held_keys['d']:
+                angle = (270-held_keys['w']*45-held_keys['s']*135)
+            if held_keys['d'] and not held_keys['a']*held_keys['d']:
+                angle = (90+held_keys['w']*45+held_keys['s']*135)
+            if angle != None:
+                self.actor.setH(angle)
+                angle = None
             
-    def move_animation(self,key):
-        if self.running and self.actor.getCurrentAnim() != "run":
-            self.actor.loop('run')
-        elif self.actor.getCurrentAnim() != "walk" and not self.running:
-            self.actor.loop("walk")
+    def move_animation(self):
+        if self.actor.getCurrentAnim() in ['attack_back', 'attack', 'attack_left', 'attack_forward', 'attack_right']:
+            print('attack')
+        elif held_keys['s'] and not held_keys['w']:
+            if self.actor.getCurrentAnim() != "walk_back" and not self.running:
+                self.actor.loop("walk_back")
+        elif held_keys['w']+held_keys['a']+held_keys['d']:
+            if self.running and self.actor.getCurrentAnim() != "run":
+                self.actor.loop('run')
+            elif self.actor.getCurrentAnim() != "walk" and not self.running:
+                self.actor.loop("walk")

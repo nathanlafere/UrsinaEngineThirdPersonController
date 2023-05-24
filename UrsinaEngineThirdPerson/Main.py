@@ -7,6 +7,7 @@ from panda3d import *
 
 app = Ursina()
 
+
     
 def input(key):
     if key == 'escape':
@@ -21,7 +22,5 @@ enemy_01 = enemy.Enemy(actor_model="assets/Poring.gltf", scale=4, position=(25,0
 
 ex_portal = portal.Portal(position=(10,0,10),exit_position=(20,0,-20))
 player = third_person_controller.ThirdPersonController()
-
-print(player.actor.getAnimNames())
 
 app.run()
