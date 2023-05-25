@@ -26,6 +26,7 @@ class ThirdPersonController(Entity,data.Character):
         self.jump_height = 2
         self.jump_up_duration = .5
         self.fall_after = .35
+        self.weapon = "bow"
         
         #state
         self.in_dash = False
@@ -248,11 +249,15 @@ class ThirdPersonController(Entity,data.Character):
                 self.actor.setH(angle)
             
     def move_animation(self):
-        orientation = (held_keys['w']*'w'+held_keys['s']*'s'+held_keys['a']*'a'+held_keys['d']*'d')[0]
+        orientation = (
+            + held_keys['w'] * 'w'
+            + held_keys['s'] * 's'
+            + held_keys['a'] * 'a'
+            + held_keys['d'] * 'd'
+        )
         if self.actor.getCurrentAnim() in ['attack_back', 'attack', 'attack_left', 'attack_forward', 'attack_right']:
-            
-            if self.actor.getCurrentAnim() != data.animation_attack[orientation]:
-                self.actor.play(data.animation_attack[orientation],fromFrame=self.actor.getCurrentFrame())
+            if self.actor.getCurrentAnim() != data.animation_attack[f'{self.weapon}-{orientation[0]}']:
+                self.actor.play(data.animation_attack[f'{self.weapon}-{orientation[0]}'],fromFrame=self.actor.getCurrentFrame())
         elif held_keys['s'] and not held_keys['w']:
             if self.actor.getCurrentAnim() != "walk_back" and not self.running:
                 self.actor.loop("walk_back")
