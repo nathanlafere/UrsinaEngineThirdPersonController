@@ -56,13 +56,15 @@ class ThirdPersonController(Entity,data.Character):
             self.rotateModel()
             self.move_animation()
         self.camera_pivot.rotation_x -= mouse.velocity[1] * self.mouse_sensitivity[0]
-        self.camera_pivot.rotation_x = clamp(self.camera_pivot.rotation_x, -20, 50)
+
         camera.position = clamp(camera.position,(0,1,-6),(0,13,-18))
         camera.rotation_x = clamp(camera.rotation_x, 7,31)
         # release cam
         if held_keys['left alt']:
             self.camera_pivot.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]
+            self.camera_pivot.rotation_x = clamp(self.camera_pivot.rotation_x, -28, 80)
         else:
+            self.camera_pivot.rotation_x = clamp(self.camera_pivot.rotation_x, -20, 50)
             self.camera_pivot.rotation_y = 0
             self.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]
 
@@ -77,24 +79,24 @@ class ThirdPersonController(Entity,data.Character):
 
 
         if self.gravity:
-            ray = raycast(self.world_position+(0,self.height,0), self.down, ignore=(self,))
-            # ray = boxcast(self.world_position+(0,2,0), self.down, ignore=(self,))
-
-            if ray.distance <= self.height+.1:
+            left_ray = raycast(self.world_position+(0,self.height,0)+self.right*0.2+self.back*0.3, self.down, ignore=(self,))
+            right_ray = raycast(self.world_position+(0,self.height,0)+self.left*0.2+self.forward*0.3, self.down, ignore=(self,))
+            middle_ray = raycast(self.world_position+(0,self.height,0), self.down, ignore=(self,))
+            if middle_ray.distance <= self.height+.1:
                 if not self.grounded:
                     self.land()
                 self.grounded = True
                 # make sure it's not a wall and that the point is not too far up
-                if ray.world_normal.y > .7 and ray.world_point.y - self.world_y < .5: # walk up slope
-                    self.y = ray.world_point[1]
+                if middle_ray.world_normal != None and middle_ray.world_normal.y > .7 and middle_ray.world_point.y - self.world_y < .5: # walk up slope
+                    self.y = middle_ray.world_point[1]
+                return
+            elif left_ray.distance <= self.height+.1 and right_ray.distance <= self.height+.1:
                 return
             else:
                 self.grounded = False
-
             # if not on ground and not on way up in jump, fall
-            self.y -= min(self.air_time, ray.distance-.05) * time.dt * 100
+            self.y -= min(self.air_time, middle_ray.distance-.05) * time.dt * 100
             self.air_time += time.dt * .25 * self.gravity
-
             if self.position[1] <= -30:
                 self.position = (1,5,1)
 
@@ -136,7 +138,7 @@ class ThirdPersonController(Entity,data.Character):
                 self.actor.loop('idle')
 
     def combo_attack(self):
-        self.actor.play('attack')
+        self.actor.play('attack',fromFrame=self.actor.getCurrentFrame())
         if time.process_time() < data.last_attack_button[1]+1+self.cooldowns[0] and data.last_attack_button[2] < 2 or data.last_attack_button[1] == 0:
             data.last_attack_button = ['left mouse down',time.process_time(),data.last_attack_button[2]+1]
         else:
