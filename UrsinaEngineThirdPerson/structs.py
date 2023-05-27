@@ -32,18 +32,23 @@ class Portal(Entity):
                     setattr(hitbox_2.entity,"rotation_y",self.rotation_y)
 
 class Bridge():
-    def __init__(self, position, railings='cube', ground='cube', **kwargs):
+    def __init__(self, position, railings='cube', ground='cube', texture='brick',collider='box', distance=5, width=5):
         self.position = position
-        
         if railings == 'cube':
-            for c in range(11):
-                c += 1
-                Entity(model=railings,scale=(1.53+c*0.5,0.5,1),texture='brick',collider='box', position=Vec3(self.position)+Vec3(c*1.01,5.3-c*0.51,2.5)),
-                Entity(model=railings,scale=(1.53+c*0.5,0.5,1),texture='brick',collider='box', position=Vec3(self.position)+Vec3(-c*1.01,5.3-c*0.51,2.5)),
-                Entity(model=railings,scale=(1.53+c*0.5,0.5,1),texture='brick',collider='box', position=Vec3(self.position)+Vec3(c*1.01,5.3-c*0.51,-2.5)),
-                Entity(model=railings,scale=(1.53+c*0.5,0.5,1),texture='brick',collider='box', position=Vec3(self.position)+Vec3(-c*1.01,5.3-c*0.51,-2.5))
+            Entity(model=railings,scale=(distance-1,0.5,1),texture=texture, texture_scale=(distance-1,1),collider=collider, position=Vec3(self.position)+Vec3(0,distance/2+1,width/2))
+            Entity(model=railings,scale=(distance-1,0.5,1),texture=texture, texture_scale=(distance-1,1),collider=collider, position=Vec3(self.position)+Vec3(0,distance/2+1,-width/2))
+            for c in range(distance+2):
+                Entity(model=railings,scale=(1.53+c*0.5,0.5,1),texture=texture, texture_scale=(1.5+c,1),collider=collider, position=Vec3(self.position)+Vec3(distance/2+c,distance/2-c*0.5+.5,2.5))
+                Entity(model=railings,scale=(1.53+c*0.5,0.5,1),texture=texture, texture_scale=(1.5+c,1),collider=collider, position=Vec3(self.position)+Vec3(-distance/2-c,distance/2-c*0.5+.5,2.5))
+                Entity(model=railings,scale=(1.53+c*0.5,0.5,1),texture=texture, texture_scale=(1.5+c,1),collider=collider, position=Vec3(self.position)+Vec3(distance/2+c,distance/2-c*0.5+.5,-2.5))
+                Entity(model=railings,scale=(1.53+c*0.5,0.5,1),texture=texture, texture_scale=(1.5+c,1),collider=collider, position=Vec3(self.position)+Vec3(-distance/2-c,distance/2-c*0.5+.5,-2.5))
+        else:
+            Entity(model=railings,collider=collider, position=Vec3(self.position)+Vec3(0,0,2.5))
+            Entity(model=railings,collider=collider, position=Vec3(self.position)+Vec3(0,0,-2.5))
         if ground == 'cube':
-            for c in range(20):
-                Entity(model=ground, scale=(0.55,0.25,5),texture='brick', collider='box', position=Vec3(self.position)+Vec3(c*0.51+2.5,3.8-c*0.2,0)),
-                Entity(model=ground, scale=(0.55,0.25,5),texture='brick', collider='box', position=Vec3(self.position)+Vec3(-c*0.51-2.5,3.8-c*0.2,0))
-            Entity(model=ground, scale=(5,0.25,5),texture='brick', collider='box', position=Vec3(self.position)+Vec3(0,4,0))
+            for c in range(int(distance*2.7)):
+                Entity(model=ground, scale=(0.55,0.25,5),texture=texture, collider=collider, position=Vec3(self.position)+Vec3(c*0.51+distance/2,distance/2-c*0.2,0))
+                Entity(model=ground, scale=(0.55,0.25,5),texture=texture, collider=collider, position=Vec3(self.position)+Vec3(-c*0.51-distance/2,distance/2-c*0.2,0))
+            Entity(model=ground, scale=(distance,0.25,5),texture=texture, texture_scale=(distance,2), collider=collider, position=Vec3(self.position)+Vec3(0,distance/2+0.2,0))
+        else:
+            Entity(model=ground,collider=collider,position=Vec3(self.position))
