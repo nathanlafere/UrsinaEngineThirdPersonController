@@ -19,8 +19,10 @@ Sky()
 enemy_01 = enemies.Enemy(actor_model="assets/Poring.gltf", scale=2, position=(25,0,10))
 enemy_01 = enemies.Enemy(actor_model="assets/Poring.gltf", scale=3, position=(25,0,15))
 enemy_01 = enemies.Enemy(actor_model="assets/Poring.gltf", scale=4, position=(25,0,20))
-ex_portal = structs.Portal(position=(10,0,10),exit_position=(20,0,-20))
+ex_portal = structs.Portal(position=(10,0,10),exit_position=(20,0,-20), rotation_y=30)
+
+
 player = third_person_controller.ThirdPersonController()
-test = structs.Bridge((40,0,0))
+structs.Bridge((40,0,0))
 
 app.run()
