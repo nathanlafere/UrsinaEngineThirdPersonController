@@ -103,11 +103,11 @@ class ThirdPersonController(Entity,data.Character):
 
     def input(self, key):
         if key == 'scroll down':
-            camera.position += (0,-1,1)
-            camera.rotation_x -= 2
-        elif key == 'scroll up':
             camera.position += (0,1,-1)
             camera.rotation_x += 2
+        elif key == 'scroll up':
+            camera.position += (0,-1,1)
+            camera.rotation_x -= 2
         if key == 'space':
             self.jump()
         if key == 'left mouse down':
