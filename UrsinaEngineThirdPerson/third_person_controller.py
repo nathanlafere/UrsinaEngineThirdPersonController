@@ -146,7 +146,7 @@ class ThirdPersonController(Entity,data.Character):
             self.animate('position', self.position+Vec3(self.back).normalized()*2, duration= 0.2, curve=curve.linear)
             hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=4.8,thickness=(2,3),ignore=[self,data.ground])
         else:
-            hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self,data.ground], debug= True)
+            hitbox=boxcast(origin=self.position+Vec3(0,0.8,0),direction=self.forward,distance=2.8,thickness=(2,3),ignore=[self,data.ground])
         if hitbox.hit:
             self.apply_damage(hitbox.entity,self.attack*0.7+ data.last_attack_button[2]*1.30)
     
@@ -210,14 +210,13 @@ class ThirdPersonController(Entity,data.Character):
         
     #confirm that it won't hit anything
     def check_raycast(self,direction):
-        feet_ray = raycast(self.position+Vec3(0,0.45,0), direction, ignore=(self,), distance=.5, debug=True)
+        feet_ray = raycast(self.position+Vec3(0,0.45,0), direction, ignore=(self,), distance=.5)
         head_ray = raycast(self.position+Vec3(0,self.height-.4,0), direction,ignore=(self,), distance=.5)
         chest_ray = raycast(self.position+Vec3(0,self.height/2,0), direction, ignore=(self,), distance=.5)
         return feet_ray.hit or head_ray.hit or chest_ray.hit
     
     def walk(self):
         move_amount = self.direction * time.dt * self.speed*1.7 if self.running else self.direction * time.dt * self.speed
-        print(self.check_raycast(Vec3(1,0,0)))
         if self.check_raycast(Vec3(1,0,0)):
             move_amount[0] = min(move_amount[0], 0)
         if self.check_raycast(Vec3(-1,0,0)):

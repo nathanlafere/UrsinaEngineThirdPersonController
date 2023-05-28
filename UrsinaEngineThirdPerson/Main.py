@@ -3,7 +3,9 @@ import data
 import enemies
 import structs
 import third_person_controller
+from perlin_noise import PerlinNoise
 from panda3d import *
+import itertools
 
 app = Ursina()
 
@@ -13,7 +15,19 @@ def input(key):
     if key == 'escape':
         quit()
 
-data.ground = Entity(model='plane', collider='box', scale=64, texture='grass', texture_scale=(4,4))
+noise = PerlinNoise(octaves=1,seed=1)
+terrain_width = 64
+
+for z, x in itertools.product(range(terrain_width), range(terrain_width)):
+    y = noise([x/terrain_width, z/terrain_width])*5
+    block = Entity(model='plane', position=(x-terrain_width/2,y,z-terrain_width/2), scale=(1,0.1,1))
+    block.parent = data.ground
+    block.rotation_x = (noise([x/terrain_width, (z-1)/terrain_width])*5 -block.y)*56.4
+    block.rotation_z = (noise([(x-1)/terrain_width, z/terrain_width])*5 -block.y)*56.4
+data.ground.combine()
+data.ground.collider = 'mesh'
+data.ground.texture = 'white_cube'
+
 Sky()
 
 enemy_01 = enemies.Enemy(actor_model="assets/Poring.gltf", scale=2, position=(25,0,10))

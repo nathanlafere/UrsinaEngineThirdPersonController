@@ -1,6 +1,6 @@
 from ursina import *
 
-ground = ()
+ground = Entity(model=None, collider=None)
 player_model = "assets/archer.gltf"
 last_move_button = (0,0) # [0]key [1]time
 last_attack_button = (0,0,0) # [0]key [1]time [2]combo len

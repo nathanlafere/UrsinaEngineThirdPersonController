@@ -13,7 +13,6 @@ class Enemy(Entity,data.Character):
         data.Character.__init__(self)
         self.__refs__['enemys'].append(self)
         self.position = position
-        self.y = data.ground.y
         self.height = self.scale_y
         self.target = None
         self.rest_time, self.walk_time = 8, 5
