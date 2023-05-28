@@ -74,8 +74,7 @@ class ThirdPersonController(Entity,data.Character):
             ).normalized()
         if mouse.moving and self.direction == 0 and self.actor.getH != 180:
             self.actor.setH(180)
-        if self.check_raycast():
-            self.walk()
+        self.walk()
 
 
         if self.gravity:
@@ -208,27 +207,29 @@ class ThirdPersonController(Entity,data.Character):
     def on_disable(self):
         mouse.locked = False
         self.cursor.enabled = False
-    
+        
     #confirm that it won't hit anything
-    def check_raycast(self):
-        feet_ray = raycast(self.position+Vec3(0,0.5,0), self.direction, ignore=(self,), distance=.5)
-        head_ray = raycast(self.position+Vec3(0,self.height-.4,0), self.direction, ignore=(self,), distance=.5)
-        chest_ray = raycast(self.position+Vec3(0,self.height/2,0), self.direction, ignore=(self,), distance=.5)
-        if not feet_ray.hit and not head_ray.hit and not chest_ray:
+    def check_raycast(self,direction):
+        feet_ray = raycast(self.position+Vec3(0,0.45,0), direction, ignore=(self,), distance=.5, debug=True)
+        head_ray = raycast(self.position+Vec3(0,self.height-.4,0), direction,ignore=(self,), distance=.5)
+        chest_ray = raycast(self.position+Vec3(0,self.height/2,0), direction, ignore=(self,), distance=.5)
+        if feet_ray.hit or head_ray.hit or chest_ray.hit:
             return True
+        else:
+            False
     
     def walk(self):
-        move_amount = self.direction * time.dt * self.speed*1.7 if self.running else self.direction * time.dt * self.speed 
-        if raycast(self.position+Vec3(-.0,1,0), Vec3(1,0,0), distance=.5, ignore=(self,)).hit:
+        move_amount = self.direction * time.dt * self.speed*1.7 if self.running else self.direction * time.dt * self.speed
+        if self.check_raycast(Vec3(1,0,0)):
             move_amount[0] = min(move_amount[0], 0)
-        if raycast(self.position+Vec3(-.0,1,0), Vec3(-1,0,0), distance=.5, ignore=(self,)).hit:
+        if self.check_raycast(Vec3(-1,0,0)):
             move_amount[0] = max(move_amount[0], 0)
-        if raycast(self.position+Vec3(-.0,1,0), Vec3(0,0,1), distance=.5, ignore=(self,)).hit:
+        if self.check_raycast(Vec3(0,0,1)):
             move_amount[2] = min(move_amount[2], 0)
-        if raycast(self.position+Vec3(-.0,1,0), Vec3(0,0,-1), distance=.5, ignore=(self,)).hit:
+        if self.check_raycast(Vec3(0,0,-1)):
             move_amount[2] = max(move_amount[2], 0)
         self.position += move_amount
-            
+        
     #Rotate de character model
     def rotateModel(self):
         if self.actor.getCurrentAnim() in [
