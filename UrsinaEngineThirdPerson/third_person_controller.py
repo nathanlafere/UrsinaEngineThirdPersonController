@@ -213,13 +213,11 @@ class ThirdPersonController(Entity,data.Character):
         feet_ray = raycast(self.position+Vec3(0,0.45,0), direction, ignore=(self,), distance=.5, debug=True)
         head_ray = raycast(self.position+Vec3(0,self.height-.4,0), direction,ignore=(self,), distance=.5)
         chest_ray = raycast(self.position+Vec3(0,self.height/2,0), direction, ignore=(self,), distance=.5)
-        if feet_ray.hit or head_ray.hit or chest_ray.hit:
-            return True
-        else:
-            False
+        return feet_ray.hit or head_ray.hit or chest_ray.hit
     
     def walk(self):
         move_amount = self.direction * time.dt * self.speed*1.7 if self.running else self.direction * time.dt * self.speed
+        print(self.check_raycast(Vec3(1,0,0)))
         if self.check_raycast(Vec3(1,0,0)):
             move_amount[0] = min(move_amount[0], 0)
         if self.check_raycast(Vec3(-1,0,0)):
