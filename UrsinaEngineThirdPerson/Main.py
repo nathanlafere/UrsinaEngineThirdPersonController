@@ -15,8 +15,9 @@ def input(key):
     if key == 'escape':
         quit()
 
+#data.ground = Entity(model='plane', scale=100, texture='grass', collider='box')
 noise = PerlinNoise(octaves=1,seed=1)
-terrain_width = 64
+terrain_width = 32
 
 for z, x in itertools.product(range(terrain_width), range(terrain_width)):
     y = noise([x/terrain_width, z/terrain_width])*5

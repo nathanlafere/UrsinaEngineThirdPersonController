@@ -9,8 +9,7 @@ class ThirdPersonController(Entity,data.Character):
         super().__init__()
         data.Character.__init__(self)
         self.height = 2
-        self.camera_pivot = Entity(parent=self, y=self.height)
-
+        self.camera_pivot = Entity(y=150)
         camera.parent = self.camera_pivot
         camera.position = (0,10,-15)
         camera.rotation = (25,0,0)
@@ -52,22 +51,24 @@ class ThirdPersonController(Entity,data.Character):
 
 
     def update(self):
+        self.camera_pivot.x,self.camera_pivot.z = self.x,self.z
+        self.camera_pivot.y += (self.y+2 - self.camera_pivot.y) * time.dt * 5
         if held_keys['a']+held_keys['d']+held_keys['w']+held_keys['s']:
             self.rotateModel()
             self.move_animation()
+            
         self.camera_pivot.rotation_x -= mouse.velocity[1] * self.mouse_sensitivity[0]
-
         camera.position = clamp(camera.position,(0,1,-6),(0,13,-18))
         camera.rotation_x = clamp(camera.rotation_x, 7,31)
         # release cam
         if held_keys['left alt']:
-            self.camera_pivot.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]
             self.camera_pivot.rotation_x = clamp(self.camera_pivot.rotation_x, -28, 80)
+            self.camera_pivot.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]
         else:
             self.camera_pivot.rotation_x = clamp(self.camera_pivot.rotation_x, -20, 50)
-            self.camera_pivot.rotation_y = 0
             self.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]
-
+            self.camera_pivot.rotation_y = self.rotation_y
+        
         self.direction = Vec3(
             self.forward * (held_keys['w'] - held_keys['s'])
             + self.right * (held_keys['d'] - held_keys['a'])

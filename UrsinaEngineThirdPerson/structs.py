@@ -9,9 +9,9 @@ class Portal(Entity):
         self.exit_position = exit_position
         self.position = position
         conected_portal = Entity(position=Vec3(exit_position), **kwargs)
-        self.actor_1 = Actor("assets/Portal.egg")
+        self.actor_1 = Actor("assets/Portal")
         self.actor_1.reparentTo(self)
-        self.actor_2 = Actor("assets/Portal.egg")
+        self.actor_2 = Actor("assets/Portal")
         self.actor_2.reparentTo(conected_portal)
         
         for key, value in kwargs.items():
