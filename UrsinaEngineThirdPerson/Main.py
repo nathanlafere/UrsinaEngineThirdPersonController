@@ -11,42 +11,57 @@ app = Ursina()
 
 
 def update():
-    if player.z > data.ground.model.vertices[len(data.ground.model.vertices) // 2-120][2]+8:
-        move_map()
+    middle= data.ground.model.vertices[len(data.ground.model.vertices) // 2-120]
+    if player.z > middle[2]+8.5:
+        move_map('z+')
+    if player.z < middle[2]-7.5:
+        move_map('z-')
+    if player.x > middle[0]+7.5:
+        move_map('x+')
+    if player.x < middle[0]-8.5:
+        move_map('x-')  
 
 def input(key):
     if key == 'escape':
         quit()
-    if key == 'c':
-        #setattr(data.ground, 'model', Mesh(data.ground.model.vertices[:-240],uvs=data.ground.model.vertices[:-240])) #↑
-        #setattr(data.ground, 'model', Mesh(data.ground.model.vertices[240:],uvs=data.ground.model.vertices[240:]))  #↓
 
-        '''for a, _ in itertools.product(range(40), range(6)): #←
-            data.ground.model.vertices.pop(a*234)
-        setattr(data.ground, 'model', Mesh(data.ground.model.vertices,uvs=data.ground.model.vertices))'''
-        '''for a in range(40): #→
-            for c in range(6):
-                data.ground.model.vertices.pop(234*a+234)
-        setattr(data.ground, 'model', Mesh(data.ground.model.vertices,uvs=data.ground.model.vertices))'''
-
-def render_map(x,z):
+def render_map(x,z,index):
     y = noise([x/terrain_width, z/terrain_width])*5
-    data.ground.model.vertices.extend([
-        (x-terrain_width/2 +0.5, y+ (noise([(x+1)/terrain_width, (z+1)/terrain_width])*5 -y), z-terrain_width/2 +0.5),
-        (x-terrain_width/2 -0.5, y+ (noise([(x)/terrain_width, (z+1)/terrain_width])*5 -y), z-terrain_width/2 +0.5),
-        (x-terrain_width/2 -0.5, y, z-terrain_width/2 -0.5),
-        (x-terrain_width/2 +0.5, y+ (noise([(x+1)/terrain_width, (z)/terrain_width])*5 -y), z-terrain_width/2 -0.5),
-        (x-terrain_width/2 +0.5, y+ (noise([(x+1)/terrain_width, (z+1)/terrain_width])*5 -y), z-terrain_width/2 +0.5),
-        (x-terrain_width/2 -0.5, y, z-terrain_width/2 -0.5)])
+    data.ground.model.vertices.insert(index,(x-terrain_width/2 -0.5, y, z-terrain_width/2 -0.5))
+    data.ground.model.vertices.insert(index,(x-terrain_width/2 +0.5, y+ (noise([(x+1)/terrain_width, (z+1)/terrain_width])*5 -y), z-terrain_width/2 +0.5))
+    data.ground.model.vertices.insert(index,(x-terrain_width/2 +0.5, y+ (noise([(x+1)/terrain_width, (z)/terrain_width])*5 -y), z-terrain_width/2 -0.5))
+    data.ground.model.vertices.insert(index,(x-terrain_width/2 -0.5, y, z-terrain_width/2 -0.5))
+    data.ground.model.vertices.insert(index,(x-terrain_width/2 -0.5, y+ (noise([(x)/terrain_width, (z+1)/terrain_width])*5 -y), z-terrain_width/2 +0.5))
+    data.ground.model.vertices.insert(index,(x-terrain_width/2 +0.5, y+ (noise([(x+1)/terrain_width, (z+1)/terrain_width])*5 -y), z-terrain_width/2 +0.5))
 
-def move_map():
-    map_center = data.ground.model.vertices[len(data.ground.model.vertices) // 2-120]
-    for c in range(40):
-        render_map(c, map_center[2]+40.5)
-    setattr(data.ground, 'model', Mesh(vertices=data.ground.model.vertices[240:],uvs=data.ground.model.vertices[240:]))
+
+def move_map(direct):
+    if direct == 'z+':
+        ground_pos = data.ground.model.vertices[-239]
+        for c in range(40):
+            render_map(c+ground_pos[0]+20.5, ground_pos[2]+20.5, len(data.ground.model.vertices))
+        setattr(data.ground, 'model', Mesh(vertices=data.ground.model.vertices[240:],uvs=data.ground.model.vertices[240:]))
+    if direct == 'z-':
+        ground_pos = data.ground.model.vertices[2]
+        for c in range(40):
+            render_map(-c+ground_pos[0]+19.5+terrain_width, ground_pos[2]+19.5, 0)
+        setattr(data.ground, 'model', Mesh(data.ground.model.vertices[:-240],uvs=data.ground.model.vertices[:-240]))
+    if direct == 'x+':
+        ground_pos = data.ground.model.vertices[-2]
+        for c in range(40):
+            render_map(ground_pos[0]+20.5,c+ground_pos[2]-19.5,240*c+240)
+            for _ in range(6):
+                data.ground.model.vertices.pop(c*240)
+        setattr(data.ground, 'model', Mesh(data.ground.model.vertices,uvs=data.ground.model.vertices))
+    if direct == 'x-':
+        ground_pos = data.ground.model.vertices[2]
+        for c in range(40):
+            render_map(ground_pos[0]+19.5,c+ground_pos[2]+20.5,c*240)
+            for _ in range(6):
+                data.ground.model.vertices.pop(240*c+240)
+        setattr(data.ground, 'model', Mesh(data.ground.model.vertices,uvs=data.ground.model.vertices))
     data.ground.collider = Mesh(vertices=data.ground.model.vertices)
-
-
+    
 
 noise = PerlinNoise(octaves=3,seed=1)
 terrain_width = 40
@@ -54,15 +69,14 @@ terrain_width = 40
 
 for z, x in itertools.product(range(terrain_width), range(terrain_width)):
     y = noise([x/terrain_width, z/terrain_width])*5
-    data.ground.vertices.extend([
-        (x-terrain_width/2 +0.5, y+ (noise([(x+1)/terrain_width, (z+1)/terrain_width])*5 -y), z-terrain_width/2 +0.5),
-        (x-terrain_width/2 -0.5, y+ (noise([(x)/terrain_width, (z+1)/terrain_width])*5 -y), z-terrain_width/2 +0.5),
-        (x-terrain_width/2 -0.5, y, z-terrain_width/2 -0.5),
-        (x-terrain_width/2 +0.5, y+ (noise([(x+1)/terrain_width, (z)/terrain_width])*5 -y), z-terrain_width/2 -0.5),
-        (x-terrain_width/2 +0.5, y+ (noise([(x+1)/terrain_width, (z+1)/terrain_width])*5 -y), z-terrain_width/2 +0.5),
-        (x-terrain_width/2 -0.5, y, z-terrain_width/2 -0.5)])
+    data.ground.vertices.append((x-terrain_width/2 +0.5, y+ (noise([(x+1)/terrain_width, (z+1)/terrain_width])*5 -y), z-terrain_width/2 +0.5))
+    data.ground.vertices.append((x-terrain_width/2 -0.5, y+ (noise([(x)/terrain_width, (z+1)/terrain_width])*5 -y), z-terrain_width/2 +0.5))
+    data.ground.vertices.append((x-terrain_width/2 -0.5, y, z-terrain_width/2 -0.5))
+    data.ground.vertices.append((x-terrain_width/2 +0.5, y+ (noise([(x+1)/terrain_width, (z)/terrain_width])*5 -y), z-terrain_width/2 -0.5))
+    data.ground.vertices.append((x-terrain_width/2 +0.5, y+ (noise([(x+1)/terrain_width, (z+1)/terrain_width])*5 -y), z-terrain_width/2 +0.5))
+    data.ground.vertices.append((x-terrain_width/2 -0.5, y, z-terrain_width/2 -0.5))
 
-data.ground = Entity(model=Mesh(vertices=data.ground.vertices, uvs=data.ground.vertices),texture='grass')
+data.ground = Entity(model=Mesh(vertices=data.ground.vertices, uvs=data.ground.vertices),texture='white_cube')
 data.ground.collider = MeshCollider(data.ground)
 
 Sky()
