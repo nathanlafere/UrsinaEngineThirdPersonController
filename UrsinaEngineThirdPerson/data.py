@@ -1,4 +1,4 @@
-from ursina import *
+from ursina import Mesh
 
 ground = Mesh(vertices=[], uvs=[])
 player_model = "assets/archer.gltf"
@@ -24,6 +24,10 @@ class Character():
         self.luk = 5
         self.speed = 4
         self.health = 60
-
+        self.health_max = 60
+        self.mana = 40
+        self.mana_max = 40
+        self.experience = 10
+        self.experience_max = 120
         self.invulnerable = False
         

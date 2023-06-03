@@ -6,6 +6,7 @@ import third_person_controller
 from perlin_noise import PerlinNoise
 from panda3d import *
 import itertools
+import interface
 
 app = Ursina()
 
@@ -85,5 +86,6 @@ enemy_01 = enemies.Enemy(actor_model="assets/Poring.gltf", scale=3, position=(25
 enemy_01 = enemies.Enemy(actor_model="assets/Poring.gltf", scale=4, position=(25,0,20))
 ex_portal = structs.Portal(position=(10,0,10),exit_position=(20,0,-20), rotation_y=30)
 player = third_person_controller.ThirdPersonController()
+base_interface = interface.BaseInterface(player)
 
 app.run()

@@ -3,9 +3,10 @@ import data
 from panda3d import *
 from direct.actor.Actor import Actor
 
+
 class ThirdPersonController(Entity,data.Character):
     def __init__(self, **kwargs):
-        self.cursor = Entity(parent=camera.ui, model='quad', color=color.pink, scale=.008, rotation_z=45)
+        #self.cursor = Entity(parent=camera.ui, model='quad', color=color.pink, scale=.008, rotation_z=45)
         super().__init__()
         data.Character.__init__(self)
         self.height = 2
@@ -56,18 +57,18 @@ class ThirdPersonController(Entity,data.Character):
         if held_keys['a']+held_keys['d']+held_keys['w']+held_keys['s']:
             self.rotateModel()
             self.move_animation()
-            
-        self.camera_pivot.rotation_x -= mouse.velocity[1] * self.mouse_sensitivity[0]
         camera.position = clamp(camera.position,(0,1,-6),(0,13,-18))
         camera.rotation_x = clamp(camera.rotation_x, 7,31)
         # release cam
-        if held_keys['left alt']:
-            self.camera_pivot.rotation_x = clamp(self.camera_pivot.rotation_x, -28, 80)
-            self.camera_pivot.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]
-        else:
-            self.camera_pivot.rotation_x = clamp(self.camera_pivot.rotation_x, -20, 50)
-            self.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]
-            self.camera_pivot.rotation_y = self.rotation_y
+        if mouse.locked == True:
+            self.camera_pivot.rotation_x -= mouse.velocity[1] * self.mouse_sensitivity[0]
+            if held_keys['left alt']:
+                self.camera_pivot.rotation_x = clamp(self.camera_pivot.rotation_x, -28, 80)
+                self.camera_pivot.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]
+            else:
+                self.camera_pivot.rotation_x = clamp(self.camera_pivot.rotation_x, -20, 50)
+                self.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]
+                self.camera_pivot.rotation_y = self.rotation_y
         
         self.direction = Vec3(
             self.forward * (held_keys['w'] - held_keys['s'])
@@ -102,23 +103,25 @@ class ThirdPersonController(Entity,data.Character):
 
 
     def input(self, key):
-        if key == 'scroll down':
-            camera.position += (0,1,-1)
-            camera.rotation_x += 2
-        elif key == 'scroll up':
-            camera.position += (0,-1,1)
-            camera.rotation_x -= 2
+        if mouse.locked == True:
+            if key == 'scroll down':
+                camera.position += (0,1,-1)
+                camera.rotation_x += 2
+            elif key == 'scroll up':
+                camera.position += (0,-1,1)
+                camera.rotation_x -= 2
+            if key == 'left mouse down':
+                if self.in_dash:
+                    self.dash_attack()
+                elif self.cooldowns[0] < time.process_time():
+                    if self.running:
+                        self.speed -= 1.5
+                        invoke(setattr,self,'speed',self.speed+1.5,delay=0.2)
+                    self.cooldowns[0] = time.process_time() + 80*time.dt
+                    self.combo_attack()
+        
         if key == 'space':
             self.jump()
-        if key == 'left mouse down':
-            if self.in_dash:
-                self.dash_attack()
-            elif self.cooldowns[0] < time.process_time():
-                if self.running:
-                    self.speed -= 1.5
-                    invoke(setattr,self,'speed',self.speed+1.5,delay=0.2)
-                self.cooldowns[0] = time.process_time() + 80*time.dt
-                self.combo_attack()
         self.running = bool(
             held_keys['left shift']
             and held_keys['w']+ held_keys['a']+ held_keys['d']
@@ -200,14 +203,6 @@ class ThirdPersonController(Entity,data.Character):
                 entity.target = self
             if not getattr(entity,"invulnerable"):
                 entity.health -= damage - getattr(entity, "defense")
-
-    def on_enable(self):
-        mouse.locked = True
-        self.cursor.enabled = True
-        
-    def on_disable(self):
-        mouse.locked = False
-        self.cursor.enabled = False
         
     #confirm that it won't hit anything
     def check_raycast(self,direction):

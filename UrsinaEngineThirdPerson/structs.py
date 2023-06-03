@@ -54,5 +54,5 @@ class Bridge():
                 Entity(model=ground, scale=(0.55,0.25,width)[::g_direct],texture=texture, collider=collider, position=Vec3(self.position)+Vec3((-c*0.51-distance/2,distance/2-c*0.2,0)[::g_direct]))
             Entity(model=ground, scale=(distance,0.25,width)[::g_direct],texture=texture, texture_scale=(distance,2), collider=collider, position=Vec3(self.position)+Vec3((0,distance/2+0.2,0)[::g_direct]))
         else:
-            g_model_direct = 90 if direct=='z' else 0
-            Entity(model=ground,collider=collider,position=Vec3(self.position), rotation_y = g_model_direct)
+            ground_model_direct = 90 if direct=='z' else 0
+            Entity(model=ground,collider=collider,position=Vec3(self.position), rotation_y = ground_model_direct)
