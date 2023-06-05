@@ -80,24 +80,36 @@ class StatusBar(Entity):
     def __init__(self, player, **kwargs):
         self.player = player
         super().__init__(**kwargs)
-        self.health_bar = Entity(model='quad', scale_y=.06, color=color.green, parent=self, y=0.18, percent_text = '100%')
-        self.mana_bar = Entity(model='quad', scale_y=.06, color=color.blue, parent=self, y=0.08, percent_text = '100%')
-        self.experience_bar = Entity(model='quad', scale_y=.04, color=color.gray, parent=self, y=-0.005, percent_text = '100%')
-        Text(parent=self, scale=(2,4.8),text=self.health_bar.percent_text,color=color.black, position=Vec2(0.37,0.234))
+        self.health_bar = create_bar(self,Vec2(-0.025,0.18),_color=color.green, border=True)
+        self.mana_bar = create_bar(self,Vec2(-0.025,0.08),_color=color.blue, border=True)
+        self.experience_bar = create_bar(self,Vec2(-0.025,-0.005),(0.72,.04),_color=color.dark_gray)
     def update(self):
-        # status bar control 
-        bar_update(self.health_bar,self.player.health,self.player.health_max,-0.4,0.75)
-        bar_update(self.mana_bar,self.player.mana,self.player.mana_max,-0.4,0.75)
-        bar_update(self.experience_bar,self.player.experience,self.player.experience_max,-0.4,0.75)
-        
+        update_bar(self.health_bar,self.player.health)
+        update_bar(self.mana_bar,self.player.mana)
+        update_bar(self.experience_bar,self.player.experience)
+
+
 class Menu():
     def __init__(self):
         super().__init__()
 
-def bar_update(bar,value,value_max,pos_x,_scale_x):
-    bar.percent_text = value*100/value_max/100
-    bar.scale_x = _scale_x*value*100/value_max/100
-    bar.x = _scale_x*value*100/value_max/100/2 +pos_x
-    
+def create_bar(_parent, pos, size=(0.75,.06), _color=color.blue, border=False):
+    if border:
+        # middle border
+        Entity(model='quad', scale=size+(.02,.028), color=color.gold, parent=_parent, position=pos)
+        # right border
+        Entity(model='quad', scale=size+(-.71,+.003), color=color.gold, parent=_parent, position=pos+Vec2(0.378,0))
+        Entity(model='quad', scale=size+(-.71,+.018), color=color.gold, parent=_parent, position=pos+Vec2(0.373,0))
+        Entity(model='quad', scale=size+(-.71,+.028), color=color.gold, parent=_parent, position=pos+Vec2(0.37,0))
+        # left border
+        Entity(model='quad', scale=size+(-.71,+.003), color=color.gold, parent=_parent, position=pos-Vec2(0.378,0))
+        Entity(model='quad', scale=size+(-.71,+.018), color=color.gold, parent=_parent, position=pos-Vec2(0.373,0))
+        Entity(model='quad', scale=size+(-.71,+.028), color=color.gold, parent=_parent, position=pos-Vec2(0.37,0))
+    return [Entity(model='quad', scale=size, color=color.gray, parent=_parent, position=pos),Entity(model='quad', scale=size, color=_color, parent=_parent, position=pos, percent_text = '100%')]
+
+def update_bar(bar,values):
+    bar[1].scale_x = bar[0].scale_x*(values[0]*100/values[1])/100
+    bar[1].x = bar[0].x +(bar[1].scale_x - bar[0].scale_x)/2
+
 def drag(held):
     held[0].position = mouse.position + held[1]

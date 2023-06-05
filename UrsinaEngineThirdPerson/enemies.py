@@ -59,7 +59,7 @@ class Enemy(Entity,data.Character):
         
         elif not self.in_combat:
             self.find_target()
-        if self.health <= 0:
+        if self.health[0] <= 0:
             destroy(self)
         
         if self.gravity:
@@ -128,7 +128,7 @@ class Enemy(Entity,data.Character):
             and not getattr(entity, "invulnerable")
             and damage > getattr(entity, "defense")
         ):
-            entity.health -= damage - getattr(entity, "defense")
+            entity.health[0] -= damage - getattr(entity, "defense")
             
     def behavior_control(self):
         if self.in_combat and self.actor.get_current_anim() != 'enemy_action_attack':

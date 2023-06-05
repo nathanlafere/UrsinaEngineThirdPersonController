@@ -202,7 +202,7 @@ class ThirdPersonController(Entity,data.Character):
             if getattr(entity, "target") is None:
                 entity.target = self
             if not getattr(entity,"invulnerable"):
-                entity.health -= damage - getattr(entity, "defense")
+                entity.health[0] -= damage - getattr(entity, "defense")
         
     #confirm that it won't hit anything
     def check_raycast(self,direction):

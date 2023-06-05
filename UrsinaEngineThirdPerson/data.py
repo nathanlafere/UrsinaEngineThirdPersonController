@@ -23,11 +23,8 @@ class Character():
         self.vit = 1
         self.luk = 5
         self.speed = 4
-        self.health = 60
-        self.health_max = 60
-        self.mana = 40
-        self.mana_max = 40
-        self.experience = 10
-        self.experience_max = 120
+        self.health = [60,60]
+        self.mana = [40,40]
+        self.experience = [0,120]
         self.invulnerable = False
         
