@@ -19,8 +19,8 @@ animation_attack = {
 class Character():
     def __init__(self):
         self.str = 6
-        self.agi = 1
         self.vit = 1
+        self.agi = 1
         self.luk = 5
         self.speed = 4
         self.health = [60,60]

@@ -59,11 +59,11 @@ class Enemy(Entity,data.Character):
         
         elif not self.in_combat:
             self.find_target()
-        if self.health[0] <= 0:
-            destroy(self)
         
         if self.gravity:
             self.apply_gravity()
+        if self.health[0] <= 0:
+            destroy(self)
 
 
     def choice_walk_direction(self):

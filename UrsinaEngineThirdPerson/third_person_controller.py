@@ -20,8 +20,9 @@ class ThirdPersonController(Entity,data.Character):
         
 
         #attributes
-        self.attack = 5
-        self.defense = 1
+        self.attribute_points = 0
+        self.attack = 1 + (self.str*60/100)
+        self.defense = 1 + (self.vit*40/100)
         self.gravity = 1
         self.jump_height = 2
         self.jump_up_duration = .5
@@ -78,7 +79,9 @@ class ThirdPersonController(Entity,data.Character):
             self.actor.setH(180)
         self.walk()
 
-
+        if self.experience[0] >= self.experience[1]:
+            self.raise_status()
+            
         if self.gravity:
             left_ray = raycast(self.world_position+(0,self.height,0)+self.right*0.2+self.back*0.3, self.down, ignore=(self,))
             right_ray = raycast(self.world_position+(0,self.height,0)+self.left*0.2+self.forward*0.3, self.down, ignore=(self,))
@@ -196,13 +199,16 @@ class ThirdPersonController(Entity,data.Character):
             
     #applies damage and some status changes after hitting something
     def apply_damage(self,entity,damage):
-        if hasattr(entity,"health"):
-            if not getattr(entity,"in_combat"):
-                entity.in_combat = True
-            if getattr(entity, "target") is None:
-                entity.target = self
-            if not getattr(entity,"invulnerable"):
-                entity.health[0] -= damage - getattr(entity, "defense")
+        if not hasattr(entity, "health"):
+            return
+        if not getattr(entity,"in_combat"):
+            entity.in_combat = True
+        if getattr(entity, "target") is None:
+            entity.target = self
+        if not getattr(entity,"invulnerable"):
+            entity.health[0] -= damage - getattr(entity, "defense")
+            if entity.health[0] <= 0:
+                self.experience[0] += entity.experience
         
     #confirm that it won't hit anything
     def check_raycast(self,direction):
@@ -257,8 +263,18 @@ class ThirdPersonController(Entity,data.Character):
         elif held_keys['s'] and not held_keys['w']:
             if self.actor.getCurrentAnim() != "walk_back" and not self.running:
                 self.actor.loop("walk_back")
-        elif held_keys['w']+held_keys['a']+held_keys['d']:
+        elif held_keys['w']+held_keys['a']+held_keys['d'] and not held_keys['a']*held_keys['d']:
             if self.running and self.actor.getCurrentAnim() != "run":
                 self.actor.loop('run')
             elif self.actor.getCurrentAnim() != "walk" and not self.running:
                 self.actor.loop("walk")
+    
+    def raise_status(self):
+        self.experience[0] = self.experience[0] - self.experience[1]
+        self.experience[1] += self.experience[1]*30/100
+        self.health[1] += 3
+        self.mana[1] += 1.5
+        self.attack += 0.5
+        self.defense += 0.5
+        self.attribute_points += 1
+        self.health[0],self.mana[0] = self.health[1],self.mana[1]
