@@ -1,5 +1,6 @@
 from ursina import *
 import data
+import itertools
 import third_person_controller
 
 class BaseInterface(Entity):
@@ -24,12 +25,19 @@ class BaseInterface(Entity):
                         self.ui_open_tabs.append(tab_clicked)
                         for c in range(len(self.ui_open_tabs)):
                             self.ui_open_tabs[c].z = -(c+1)
-                    self.held = [mouse.hovered_entity,mouse.hovered_entity.position-mouse.position]
+                    if mouse.hovered_entity.parent == camera.ui:
+                        self.held = [mouse.hovered_entity, Vec3(mouse.hovered_entity.position)-Vec3(mouse.position)]
+                    else:
+                        self.held = [mouse.hovered_entity, Vec3(mouse.hovered_entity.position)-Vec3(mouse.position)/Vec3(mouse.hovered_entity.parent.scale)]
                     self.held[0].collision = False
             else:
                 drag(self.held)
         elif self.held != None:
-            if self.held[0] in self.inventory.inventory_itens and not self.inventory.hovered :
+            if (
+                self.held[0] in self.inventory.inventory_itens
+                and not self.inventory.hovered
+                and mouse.hovered_entity not in self.inventory.inventory_itens
+            ):
                 destroy(self.held[0])
             self.held[0].collision = True
             self.held = None
@@ -59,18 +67,18 @@ class BaseInterface(Entity):
 class Inventory(Entity):
     def __init__(self):
         super().__init__()
-        self.model='quad'
+        self.inventory_itens = []
+        self.inventory_slots = []
+        self.model = 'quad'
+        self.scale=(0.5,0.7)
         self.parent=camera.ui
-        self.color= color.red
         self.collider ='box'
-        self.button = Button(text='click me!',highlight_color=color.dark_gray,scale=(0.1,0.1), text_color=color.white, parent=self)
-        self.button.on_click = self.clicked
-        a=Entity(model='quad', parent=self, color=color.black, scale=Vec2(0.1,0.1), collider='box')
-        self.inventory_itens = [self.button,a]
-        self.enabled = False
+        self.color = color.gray
+        for c, l in itertools.product(range(12), range(9)):
+            slot = Entity(model='quad',scale=(0.09,0.07), z=-0.1,parent=self, collider='box', color=color.dark_gray,position=Vec2(l*0.0948-0.374,-c*0.0733+0.37))
+            self.inventory_slots.append(slot)
         
-    def clicked(self):
-        print(self)
+        self.enabled = False
 
 class StatusTab():
     def __init__(self):
@@ -95,24 +103,27 @@ class Menu():
 
 def create_bar(_parent, pos, _color=None,size=(0.75,.06), border=False, model=None):
     if model is not None:
-        return [Entity(model='quad', scale=size, texture=model, parent=_parent, position=pos),
-                Entity(model='quad', scale=size, texture='assets/gzeblue_mid', parent=_parent, position=pos, color=_color, percent_text = '100%'),
-                Entity(model='quad', scale=(0.018,size[1]), texture='assets/gzeblue_right', parent=_parent, color=_color, position=pos+(size[0]/2,0)),
-                Entity(model='quad', scale=(0.018,size[1]), texture='assets/gzeblue_left', parent=_parent, color=_color, position=pos+(-size[0]/2,0))]
+        return [Entity(model='quad', scale=size, texture=model, z=-0.1,parent=_parent, position=pos),
+                Entity(model='quad', scale=size, texture='assets/gzeblue_mid', z=-0.2,parent=_parent, position=pos, color=_color, percent_text = '100%'),
+                Entity(model='quad', scale=(0.018,size[1]), texture='assets/gzeblue_left', z=-0.3, parent=_parent, color=_color, position=pos+(-size[0]/2,0)),
+                Entity(model='quad', scale=(0.018,size[1]), texture='assets/gzeblue_right', z=-0.4, parent=_parent, color=_color, position=pos+(size[0]/2,0))]
     if border:
-        model = Quad(radius=0.16, aspect=10, mode='ngon')
-        Entity(model=model, scale=Vec2(size)+Vec2(size[1]*40/100,size[1]*40/100), color=color.gold, parent=_parent, position=pos)
-    return [Entity(model='quad', scale=size, color=color.gray, parent=_parent, position=pos),Entity(model='quad', scale=size, color=_color, parent=_parent, position=pos, percent_text = '100%')]
+        model = Quad(radius=0.16, aspect=10)
+        Entity(model=model, scale=Vec2(size)+Vec2(size[1]*40/100,size[1]*40/100), color=color.gold, z=-0.1, parent=_parent, position=pos)
+    return [Entity(model='quad', scale=size, color=color.gray, z=-0.2, parent=_parent, position=pos, percent_text = '100%'),Entity(model='quad', scale=size, color=_color, z=-0.3, parent=_parent, position=pos)]
 
 def update_bar(bar,values):
     bar[1].scale_x = bar[0].scale_x*(values[0]*100/values[1])/100
     bar[1].x = bar[0].x +(bar[1].scale_x - bar[0].scale_x)/2
     if len(bar) > 2:
         if values[0] > 0:
-            bar[2].x = bar[1].x+bar[1].scale[0]/2
+            bar[3].x = bar[1].x+bar[1].scale[0]/2
         bar[1].enabled = values[0] > 0
         bar[2].enabled = values[0] > 0
         bar[3].enabled = values[0] > 0
 
 def drag(held):
-    held[0].position = mouse.position + held[1]
+    if held[0].parent == camera.ui:
+        held[0].position = Vec2(mouse.x,mouse.y) + held[1]
+    else:
+        held[0].position = Vec2(mouse.x,mouse.y)/Vec2(held[0].parent.scale_x,held[0].parent.scale_y) + held[1]
