@@ -2,6 +2,7 @@ from ursina import *
 import data
 from panda3d import *
 from direct.actor.Actor import Actor
+import data
 
 
 class ThirdPersonController(Entity,data.Character):

@@ -4,7 +4,6 @@ import enemies
 import structs
 import third_person_controller
 import perlin_noise_map
-from panda3d import *
 import interface
 
 app = Ursina()
@@ -21,6 +20,7 @@ enemy_01 = enemies.Enemy(actor_model="assets/Poring.gltf", scale=4, position=(25
 ex_portal = structs.Portal(position=(10,0,10),exit_position=(20,0,-20), rotation_y=30)
 player = third_person_controller.ThirdPersonController()
 base_interface = interface.BaseInterface(player)
-data.ground = perlin_noise_map.PerlinNoiseMap(player,40)
+data.ground = perlin_noise_map.PerlinNoiseMap(player,31,'grass',distance_render=5)
+
 
 app.run()
