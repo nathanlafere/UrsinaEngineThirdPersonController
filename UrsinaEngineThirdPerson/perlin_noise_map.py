@@ -34,13 +34,17 @@ class PerlinNoiseMap(Entity):
                 ground_pos = self.model.vertices[-(self.terrain_width*6-1)]
                 for c in range(self.terrain_width):
                     self.render_map(c+ground_pos[0]+.5+self.terrain_width/2, ground_pos[2]+.5+self.terrain_width/2, len(self.model.vertices))
-            self.model = Mesh(vertices=self.model.vertices[(self.terrain_width*6)*self.size_render:],uvs=self.model.vertices[(self.terrain_width*6)*self.size_render:])
+            self.model.vertices = self.model.vertices[(self.terrain_width*6)*self.size_render:]
+            self.model.uvs = self.model.vertices
+            self.model.generate()
         if direct == 'z-':
             for _ in range(self.size_render):
                 ground_pos = self.model.vertices[2]
                 for c in range(self.terrain_width):
                     self.render_map(-c+ground_pos[0]-.5+self.terrain_width/2+self.terrain_width, ground_pos[2]-.5+self.terrain_width/2, 0)
-            self.model = Mesh(self.model.vertices[:-(self.terrain_width*6)*self.size_render],uvs=self.model.vertices[:-(self.terrain_width*6)*self.size_render])
+            self.model.vertices = self.model.vertices[:-(self.terrain_width*6)*self.size_render]
+            self.model.uvs = self.model.vertices
+            self.model.generate()
         if direct == 'x+':
             for _ in range(self.size_render):
                 ground_pos = self.model.vertices[-2]
@@ -48,7 +52,7 @@ class PerlinNoiseMap(Entity):
                     self.render_map(ground_pos[0]+.5+self.terrain_width/2,c+ground_pos[2]+.5-self.terrain_width/2,(self.terrain_width*6)*c+(self.terrain_width*6))
                     for _ in range(6):
                         self.model.vertices.pop(c*(self.terrain_width*6))
-            self.model = Mesh(self.model.vertices,uvs=self.model.vertices)
+            self.model.generate()
         if direct == 'x-':
             for _ in range(self.size_render):
                 ground_pos = self.model.vertices[2]
@@ -56,7 +60,7 @@ class PerlinNoiseMap(Entity):
                     self.render_map(ground_pos[0]-.5+self.terrain_width/2,c+ground_pos[2]+.5+self.terrain_width/2,c*(self.terrain_width*6))
                     for _ in range(6):
                         self.model.vertices.pop((self.terrain_width*6)*c+(self.terrain_width*6))
-            self.model = Mesh(self.model.vertices,uvs=self.model.vertices)
+            self.model.generate()
             
         self.middle = Vec3(self.model.vertices[len(self.model.vertices) // 2-self.terrain_width*3]) + Vec3(-1,0,0)
     
