@@ -5,12 +5,10 @@ from direct.actor.Actor import Actor
 import data
 
 
-class ThirdPersonController(Entity,data.Character):
+class ThirdPersonController(data.Character):
     def __init__(self, **kwargs):
         #self.cursor = Entity(parent=camera.ui, model='quad', color=color.pink, scale=.008, rotation_z=45)
         super().__init__()
-        data.Character.__init__(self)
-        self.height = 2
         self.camera_pivot = Entity(y=150)
         camera.parent = self.camera_pivot
         camera.position = (0,10,-15)
@@ -19,41 +17,26 @@ class ThirdPersonController(Entity,data.Character):
         mouse.locked = True
         self.mouse_sensitivity = Vec2(40, 40)
         
-
         #attributes
         self.attribute_points = 0
         self.attack = 1 + (self.str*60/100)
         self.defense = 1 + (self.vit*40/100)
-        self.gravity = 1
-        self.jump_height = 2
-        self.jump_up_duration = .5
-        self.fall_after = .35
         self.weapon = "bow"
         
         #state
         self.in_dash = False
-        self.jumping = False
-        self.grounded = False
         self.running = False
         self.cooldowns = [0,0,0]  #[0] basic attack, [1] dash, [2] spell attack
-        self.air_time = 0
         
         for key, value in kwargs.items():
             setattr(self, key ,value)
-
         self.actor = Actor(data.player_model)
         self.actor.setH(180)
         self.actor.reparentTo(self)
         self.collider = BoxCollider(self,center=Vec3(0,0.85,0),size=(1,1.75,1))
-        
-        # make sure we don't fall through the ground if we start inside it
-        if self.gravity:
-            ray = raycast(self.world_position+(0,self.height,0), self.down, ignore=(self,))
-            if ray.hit:
-                self.y = ray.world_point.y
-
 
     def update(self):
+        self.gravity_update()
         self.camera_pivot.x,self.camera_pivot.z = self.x,self.z
         self.camera_pivot.y += (self.y+2 - self.camera_pivot.y) * time.dt * 5
         if held_keys['a']+held_keys['d']+held_keys['w']+held_keys['s']:
@@ -83,30 +66,9 @@ class ThirdPersonController(Entity,data.Character):
         if self.experience[0] >= self.experience[1]:
             self.raise_status()
             
-        if self.gravity:
-            left_ray = raycast(self.world_position+(0,self.height,0)+self.right*0.2+self.back*0.3, self.down, ignore=(self,))
-            right_ray = raycast(self.world_position+(0,self.height,0)+self.left*0.2+self.forward*0.3, self.down, ignore=(self,))
-            middle_ray = raycast(self.world_position+(0,self.height,0), self.down, ignore=(self,))
-            if middle_ray.distance <= self.height+.1:
-                if not self.grounded:
-                    self.land()
-                self.grounded = True
-                # make sure it's not a wall and that the point is not too far up
-                if middle_ray.world_normal != None and middle_ray.world_normal.y > .7 and middle_ray.world_point.y - self.world_y < .5: # walk up slope
-                    self.y = middle_ray.world_point[1]
-                return
-            elif left_ray.distance <= self.height+.1 and right_ray.distance <= self.height+.1:
-                return
-            else:
-                self.grounded = False
-            # if not on ground and not on way up in jump, fall
-            self.y -= min(self.air_time, middle_ray.distance-.05) * time.dt * 100
-            self.air_time += time.dt * .25 * self.gravity
-            if self.position[1] <= -30:
-                self.position = (1,5,1)
-
 
     def input(self, key):
+        
         if mouse.locked == True:
             if key == 'scroll down':
                 camera.position += (0,1,-1)
@@ -126,6 +88,7 @@ class ThirdPersonController(Entity,data.Character):
         
         if key == 'space':
             self.jump()
+        
         self.running = bool(
             held_keys['left shift']
             and held_keys['w']+ held_keys['a']+ held_keys['d']
@@ -134,6 +97,7 @@ class ThirdPersonController(Entity,data.Character):
             and held_keys['w']+ held_keys['a']+ held_keys['d']
             and not held_keys['s']
         )
+        
         if key in ['w','a','s','d']:
             # Dash implements
             if key == data.last_move_button[0] and time.process_time() < data.last_move_button[1]+.3 and time.process_time() > self.cooldowns[1]:
@@ -182,22 +146,6 @@ class ThirdPersonController(Entity,data.Character):
         self.running = True
         self.cooldowns[1] = time.process_time()+4
         
-    # jump functions
-    def jump(self):
-        if not self.grounded:
-            return
-        self.grounded = False
-        self.animate_y(self.y+self.jump_height, self.jump_up_duration, resolution=int(1//time.dt), curve=curve.out_expo)
-        invoke(self.start_fall, delay=self.fall_after)
-        
-    def start_fall(self):
-        self.y_animator.pause()
-        self.jumping = False
-        
-    def land(self):
-        self.air_time = 0
-        self.grounded = True
-            
     #applies damage and some status changes after hitting something
     def apply_damage(self,entity,damage):
         if not hasattr(entity, "health"):
