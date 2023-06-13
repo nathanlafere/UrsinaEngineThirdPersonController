@@ -23,13 +23,11 @@ class Portal(Entity):
         if hitbox_1.hit:
             if hasattr(hitbox_1.entity,"health"):
                 setattr(hitbox_1.entity,"position",Vec3(self.exit_position)+self.forward*3)
-                if hasattr(hitbox_1.entity,"cursor"):
-                    setattr(hitbox_1.entity,"rotation_y",self.rotation_y)
+                setattr(hitbox_1.entity,"rotation_y",self.rotation_y)
         if hitbox_2.hit:
             if hasattr(hitbox_2.entity,"health"):
                 setattr(hitbox_2.entity,"position",Vec3(self.position)+self.forward*3)
-                if hasattr(hitbox_2.entity,"cursor"):
-                    setattr(hitbox_2.entity,"rotation_y",self.rotation_y)
+                setattr(hitbox_2.entity,"rotation_y",self.rotation_y)
 
 class Bridge():
     def __init__(self, position, railings='cube', ground='cube', texture='brick',collider='box', distance=5, direct='x', width=5):
