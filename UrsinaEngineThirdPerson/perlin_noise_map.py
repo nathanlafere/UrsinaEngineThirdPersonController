@@ -31,29 +31,29 @@ class PerlinNoiseMap(Entity):
     
     def move_map(self,direct):
         if direct == 'z+':
-            ground_pos = self.model.vertices[-(self.terrain_width*6-1)]
             for _ in range(self.size_render):
+                ground_pos = self.model.vertices[-(self.terrain_width*6-1)]
                 for c in range(self.terrain_width):
                     self.render_map(c+ground_pos[0]+.5+self.terrain_width/2, ground_pos[2]+.5+self.terrain_width/2, len(self.model.vertices))
             self.model.vertices = self.model.vertices[(self.terrain_width*6)*self.size_render:]
             self.model.uvs = self.model.vertices
         if direct == 'z-':
-            ground_pos = self.model.vertices[2]
             for _ in range(self.size_render):
+                ground_pos = self.model.vertices[2]
                 for c in range(self.terrain_width):
                     self.render_map(-c+ground_pos[0]-.5+self.terrain_width/2+self.terrain_width, ground_pos[2]-.5+self.terrain_width/2, 0)
             self.model.vertices = self.model.vertices[:-(self.terrain_width*6)*self.size_render]
             self.model.uvs = self.model.vertices
         if direct == 'x+':
-            ground_pos = self.model.vertices[-2]
             for _ in range(self.size_render):
+                ground_pos = self.model.vertices[-2]
                 for c in range(self.terrain_width):
                     self.render_map(ground_pos[0]+.5+self.terrain_width/2,c+ground_pos[2]+.5-self.terrain_width/2,(self.terrain_width*6)*c+(self.terrain_width*6))
                     for _ in range(6):
                         self.model.vertices.pop(c*(self.terrain_width*6))
         if direct == 'x-':
-            ground_pos = self.model.vertices[2]
             for _ in range(self.size_render):
+                ground_pos = self.model.vertices[2]
                 for c in range(self.terrain_width):
                     self.render_map(ground_pos[0]-.5+self.terrain_width/2,c+ground_pos[2]+.5+self.terrain_width/2,c*(self.terrain_width*6))
                     for _ in range(6):

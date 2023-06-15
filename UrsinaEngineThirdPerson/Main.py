@@ -19,7 +19,7 @@ enemy_02 = enemies.Enemy(actor_model="assets/Poring.gltf", scale=3, position=(25
 enemy_03 = enemies.Enemy(actor_model="assets/Poring.gltf", scale=4, position=(25,0,20), experience=25)
 player = third_person_controller.ThirdPersonController()
 base_interface = interface.BaseInterface(player)
-data.ground = perlin_noise_map.PerlinNoiseMap(player,80,'grass',rendering_distance=1, size_render=1,amp=8)
+data.ground = perlin_noise_map.PerlinNoiseMap(player,50,'grass',rendering_distance=20, size_render=3,amp=5)
 ex_portal = structs.Portal(position=(0,15),exit_position=(20,15), rotation_y=70)
 
 app.run()
