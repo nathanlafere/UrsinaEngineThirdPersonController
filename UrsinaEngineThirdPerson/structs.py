@@ -22,13 +22,17 @@ class Portal(Entity):
         hitbox_1 = boxcast(self.position+(0,2,0), direction=self.forward, distance=0.3, thickness=(4,4), traverse_target=scene, ignore=(data.ground,self))
         hitbox_2 = boxcast(Vec3(self.exit_position)+(0,2,0), direction=self.forward, distance=0.3, thickness=(4,4), traverse_target=scene, ignore=(data.ground,self))
         if hitbox_1.hit:
-            if hasattr(hitbox_1.entity,"health"):
-                setattr(hitbox_1.entity,"position",Vec3(self.exit_position)+self.forward*3)
-                setattr(hitbox_1.entity,"rotation_y",self.rotation_y)
+            self.teleport(hitbox_1.entity,Vec3(self.exit_position)+self.forward*3)
         if hitbox_2.hit:
             if hasattr(hitbox_2.entity,"health"):
-                setattr(hitbox_2.entity,"position",Vec3(self.position)+self.forward*3)
-                setattr(hitbox_2.entity,"rotation_y",self.rotation_y)
+                self.teleport(hitbox_2.entity,Vec3(self.position)+self.forward*3)
+                
+    def teleport(self,hit_entity,position):
+        if hasattr(hit_entity,"health"):
+            if hit_entity.type == "Enemy":
+                hit_entity.direction = self.forward
+            setattr(hit_entity,"position",position)
+            setattr(hit_entity,"rotation_y",self.rotation_y)
 
 class Bridge():
     def __init__(self, position, railings='cube', ground='cube', texture='brick',collider='box', distance=5, direct='x', width=5):
