@@ -17,11 +17,11 @@ class PerlinNoiseMap(Entity):
         self.polig_size = polig_size
         self.amp = amp
         for z, x in itertools.product(range(self.terrain_width), range(self.terrain_width)):
-            self.render_map(x,z)
+            self.render_map(x-terrain_width/2,z-terrain_width/2,len(self.model.vertices))
         self.model = Mesh(vertices=self.model.vertices, uvs=self.model.vertices)
         self.texture = terrain_texture
         self.texture_scale=self.polig_size
-        self.middle = Vec3(self.model.vertices[len(self.model.vertices) // 2-self.terrain_width*3]) + Vec3(-1,0,0)
+        self.middle = (Vec3(self.model.vertices[2])+Vec3(self.model.vertices[-2]))/2
         self.rendering = False
         
     def update(self):
@@ -29,16 +29,16 @@ class PerlinNoiseMap(Entity):
             self.model.uvs = self.model.vertices
             self.model.generate()
             self.rendering = False
-        if self.player.z > self.middle[2] + self.terrain_width/2 -self.rendering_distance and self.rendering == False:
+        if self.player.z > self.middle[2] + self.terrain_width*self.polig_size/2 -self.rendering_distance*self.polig_size and self.rendering == False:
             self.rendering = 'z+'
             _thread.start_new_thread(self.move_map, ())
-        if self.player.z < self.middle[2] - self.terrain_width/2 +self.rendering_distance and self.rendering == False:
+        if self.player.z < self.middle[2] - self.terrain_width*self.polig_size/2 +self.rendering_distance*self.polig_size and self.rendering == False:
             self.rendering = 'z-'
             _thread.start_new_thread(self.move_map, ())
-        if self.player.x > self.middle[0] + self.terrain_width/2 -self.rendering_distance and self.rendering == False:
+        if self.player.x > self.middle[0] + self.terrain_width*self.polig_size/2 -self.rendering_distance*self.polig_size and self.rendering == False:
             self.rendering = 'x+'
             _thread.start_new_thread(self.move_map, ())
-        if self.player.x < self.middle[0]- self.terrain_width/2 +self.rendering_distance and self.rendering == False:
+        if self.player.x < self.middle[0]- self.terrain_width*self.polig_size/2 +self.rendering_distance*self.polig_size and self.rendering == False:
             self.rendering = 'x-'
             _thread.start_new_thread(self.move_map, ())
         
@@ -47,48 +47,43 @@ class PerlinNoiseMap(Entity):
             for _ in range(self.size_render):
                 ground_pos = self.model.vertices[-(self.terrain_width*6-1)]
                 for c in range(self.terrain_width):
-                    self.render_map(c+ground_pos[0]+.5+self.terrain_width/2, ground_pos[2]+.5+self.terrain_width/2, len(self.model.vertices))
+                    self.render_map(c+ground_pos[0]/self.polig_size, ground_pos[2]/self.polig_size, len(self.model.vertices))
             self.model.vertices = self.model.vertices[(self.terrain_width*6)*self.size_render:]
         if self.rendering == 'z-':
             for _ in range(self.size_render):
                 ground_pos = self.model.vertices[2]
                 for c in range(self.terrain_width):
-                    self.render_map(-c+ground_pos[0]-.5+self.terrain_width/2+self.terrain_width, ground_pos[2]-.5+self.terrain_width/2, 0)
+                    self.render_map(-c+ground_pos[0]/self.polig_size+self.terrain_width-1, (ground_pos[2]-self.polig_size)/self.polig_size, 0)
             self.model.vertices = self.model.vertices[:-(self.terrain_width*6)*self.size_render]
         if self.rendering == 'x+':
             for _ in range(self.size_render):
                 ground_pos = self.model.vertices[-2]
                 for c in range(self.terrain_width):
-                    self.render_map(ground_pos[0]+.5+self.terrain_width/2,c+ground_pos[2]+.5-self.terrain_width/2,(self.terrain_width*6)*c+(self.terrain_width*6))
+                    self.render_map(ground_pos[0]/self.polig_size,c+ground_pos[2]/self.polig_size-self.terrain_width,(self.terrain_width*6)*c+(self.terrain_width*6))
                     for _ in range(6):
                         self.model.vertices.pop(c*(self.terrain_width*6))
         if self.rendering == 'x-':
             for _ in range(self.size_render):
                 ground_pos = self.model.vertices[2]
                 for c in range(self.terrain_width):
-                    self.render_map(ground_pos[0]-.5+self.terrain_width/2,c+ground_pos[2]+.5+self.terrain_width/2,c*(self.terrain_width*6))
+                    self.render_map((ground_pos[0]-self.polig_size)/self.polig_size,c+ground_pos[2]/self.polig_size,c*(self.terrain_width*6))
                     for _ in range(6):
                         self.model.vertices.pop((self.terrain_width*6)*c+(self.terrain_width*6))
-        self.middle = Vec3(self.model.vertices[len(self.model.vertices) // 2-self.terrain_width*3]) + Vec3(-1,0,0)
+        self.middle = (Vec3(self.model.vertices[2])+Vec3(self.model.vertices[-2]))/2
         self.rendering = 'end'
     
     def render_map(self,x,z,index= None):
         y = self.noise([x/self.terrain_width, z/self.terrain_width])*self.amp
-        if index is None:
-            self.model.vertices.append((x-self.terrain_width/2 +0.5, y+ (self.noise([(x+1)/self.terrain_width, (z+1)/self.terrain_width])*self.amp -y), z-self.terrain_width/2 +0.5))
-            self.model.vertices.append((x-self.terrain_width/2 -0.5, y+ (self.noise([(x)/self.terrain_width, (z+1)/self.terrain_width])*self.amp -y), z-self.terrain_width/2 +0.5))
-            self.model.vertices.append((x-self.terrain_width/2 -0.5, y, z-self.terrain_width/2 -0.5))
-            self.model.vertices.append((x-self.terrain_width/2 +0.5, y+ (self.noise([(x+1)/self.terrain_width, (z)/self.terrain_width])*self.amp -y), z-self.terrain_width/2 -0.5))
-            self.model.vertices.append((x-self.terrain_width/2 +0.5, y+ (self.noise([(x+1)/self.terrain_width, (z+1)/self.terrain_width])*self.amp -y), z-self.terrain_width/2 +0.5))
-            self.model.vertices.append((x-self.terrain_width/2 -0.5, y, z-self.terrain_width/2 -0.5))
-        else:
-            self.model.vertices.insert(index,(x-self.terrain_width/2 -0.5, y, z-self.terrain_width/2 -0.5))
-            self.model.vertices.insert(index,(x-self.terrain_width/2 +0.5, y+ (self.noise([(x+1)/self.terrain_width, (z+1)/self.terrain_width])*self.amp -y), z-self.terrain_width/2 +0.5))
-            self.model.vertices.insert(index,(x-self.terrain_width/2 +0.5, y+ (self.noise([(x+1)/self.terrain_width, (z)/self.terrain_width])*self.amp -y), z-self.terrain_width/2 -0.5))
-            self.model.vertices.insert(index,(x-self.terrain_width/2 -0.5, y, z-self.terrain_width/2 -0.5))
-            self.model.vertices.insert(index,(x-self.terrain_width/2 -0.5, y+ (self.noise([(x)/self.terrain_width, (z+1)/self.terrain_width])*self.amp -y), z-self.terrain_width/2 +0.5))
-            self.model.vertices.insert(index,(x-self.terrain_width/2 +0.5, y+ (self.noise([(x+1)/self.terrain_width, (z+1)/self.terrain_width])*self.amp -y), z-self.terrain_width/2 +0.5))
-            sleep(0.001*time.dt) # slowing down the map rendering process so it doesn't affect the rest of the game
-    def return_terrain_y(self,x,z):
-        return self.noise([(x+self.terrain_width/2+0.5)/self.terrain_width, (z+self.terrain_width/2+.5)/self.terrain_width])*self.amp
+        self.model.vertices.insert(index,(x*self.polig_size, y, z*self.polig_size))
+        self.model.vertices.insert(index,(x*self.polig_size + self.polig_size, y+ (self.noise([(x+1)/self.terrain_width, (z+1)/self.terrain_width])*self.amp -y), z*self.polig_size + self.polig_size))
+        self.model.vertices.insert(index,(x*self.polig_size + self.polig_size, y+ (self.noise([(x+1)/self.terrain_width, z/self.terrain_width])*self.amp -y), z*self.polig_size))
+        self.model.vertices.insert(index,(x*self.polig_size, y, z*self.polig_size))
+        self.model.vertices.insert(index,(x*self.polig_size, y+ (self.noise([x/self.terrain_width, (z+1)/self.terrain_width])*self.amp -y), z*self.polig_size + self.polig_size))
+        self.model.vertices.insert(index,(x*self.polig_size + self.polig_size, y+ (self.noise([(x+1)/self.terrain_width, (z+1)/self.terrain_width])*self.amp -y), z*self.polig_size + self.polig_size))
+        sleep(0.001*time.dt) # slowing down the map rendering process so it doesn't affect the rest of the game
     
+    def return_terrain_y(self,x,z): # to fix
+        x = (x)/self.polig_size
+        z = (z)/self.polig_size
+        
+        return self.noise([(x)/self.terrain_width, (z)/self.terrain_width])*self.amp
