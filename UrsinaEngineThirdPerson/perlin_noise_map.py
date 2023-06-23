@@ -6,7 +6,7 @@ from time import sleep
 
 
 class PerlinNoiseMap(Entity):
-    def __init__(self, player, terrain_width, terrain_texture='white_cube', rendering_distance=10, size_render=5, amp=5, polig_size=1):
+    def __init__(self, player, terrain_width=40, terrain_texture='grass', rendering_distance=10, size_render=10, amp=2, polig_size=1, freq=150):
         super().__init__()
         self.player = player
         self.terrain_width = terrain_width if terrain_width % 2 == 0 else terrain_width+1
@@ -16,6 +16,7 @@ class PerlinNoiseMap(Entity):
         self.size_render = size_render
         self.polig_size = polig_size
         self.amp = amp
+        self.freq = freq
         for z, x in itertools.product(range(self.terrain_width), range(self.terrain_width)):
             self.render_map(x-terrain_width/2,z-terrain_width/2,len(self.model.vertices))
         self.model = Mesh(vertices=self.model.vertices, uvs=self.model.vertices)
@@ -73,17 +74,17 @@ class PerlinNoiseMap(Entity):
         self.rendering = 'end'
     
     def render_map(self,x,z,index= None):
-        y = self.noise([x/self.terrain_width, z/self.terrain_width])*self.amp
+        y = self.noise([x/self.freq, z/self.freq])*self.amp
         self.model.vertices.insert(index,(x*self.polig_size, y, z*self.polig_size))
-        self.model.vertices.insert(index,(x*self.polig_size + self.polig_size, y+ (self.noise([(x+1)/self.terrain_width, (z+1)/self.terrain_width])*self.amp -y), z*self.polig_size + self.polig_size))
-        self.model.vertices.insert(index,(x*self.polig_size + self.polig_size, y+ (self.noise([(x+1)/self.terrain_width, z/self.terrain_width])*self.amp -y), z*self.polig_size))
+        self.model.vertices.insert(index,(x*self.polig_size + self.polig_size, y+ (self.noise([(x+1)/self.freq, (z+1)/self.freq])*self.amp -y), z*self.polig_size + self.polig_size))
+        self.model.vertices.insert(index,(x*self.polig_size + self.polig_size, y+ (self.noise([(x+1)/self.freq, z/self.freq])*self.amp -y), z*self.polig_size))
         self.model.vertices.insert(index,(x*self.polig_size, y, z*self.polig_size))
-        self.model.vertices.insert(index,(x*self.polig_size, y+ (self.noise([x/self.terrain_width, (z+1)/self.terrain_width])*self.amp -y), z*self.polig_size + self.polig_size))
-        self.model.vertices.insert(index,(x*self.polig_size + self.polig_size, y+ (self.noise([(x+1)/self.terrain_width, (z+1)/self.terrain_width])*self.amp -y), z*self.polig_size + self.polig_size))
+        self.model.vertices.insert(index,(x*self.polig_size, y+ (self.noise([x/self.freq, (z+1)/self.freq])*self.amp -y), z*self.polig_size + self.polig_size))
+        self.model.vertices.insert(index,(x*self.polig_size + self.polig_size, y+ (self.noise([(x+1)/self.freq, (z+1)/self.freq])*self.amp -y), z*self.polig_size + self.polig_size))
         sleep(0.001*time.dt) # slowing down the map rendering process so it doesn't affect the rest of the game
     
-    def return_terrain_y(self,x,z): # to fix
-        x = (x)/self.polig_size
-        z = (z)/self.polig_size
+    def return_terrain_y(self,x,z):
+        x = x/self.polig_size
+        z = z/self.polig_size
         
-        return self.noise([(x)/self.terrain_width, (z)/self.terrain_width])*self.amp
+        return self.noise([x/self.freq, z/self.freq])*self.amp

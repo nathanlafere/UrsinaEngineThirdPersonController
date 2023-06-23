@@ -71,8 +71,9 @@ class Character(Entity):
         # if not on ground and not on way up in jump, fall
         self.y -= min(self.air_time, middle_ray.distance-.05, self.y - terrain_y-.05) * time.dt * 100
         self.air_time += time.dt * .25 * self.gravity
-        if self.position[1] <= -30:
-            self.position = (1,5,1)
+        terrain_y = ground.return_terrain_y(self.x,self.z)
+        if self.position[1] <= terrain_y-10:
+            self.y = terrain_y+2
         
     # jump functions
     def jump(self):
