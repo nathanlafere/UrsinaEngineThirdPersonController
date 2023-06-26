@@ -28,17 +28,26 @@ class BaseInterface(Entity):
                     if mouse.hovered_entity.parent == camera.ui:
                         self.held = [mouse.hovered_entity, Vec3(mouse.hovered_entity.position)-Vec3(mouse.position)]
                     else:
-                        self.held = [mouse.hovered_entity, Vec3(mouse.hovered_entity.position)-Vec3(mouse.position)/Vec3(mouse.hovered_entity.parent.scale)]
+                        self.held = [mouse.hovered_entity, Vec3(mouse.hovered_entity.position)-Vec3(mouse.position)/Vec3(mouse.hovered_entity.parent.scale), Vec2(mouse.hovered_entity.x,mouse.hovered_entity.y)]
+                    self.held[0].z -= 1
                     self.held[0].collision = False
             else:
                 drag(self.held)
         elif self.held != None:
-            if (
-                self.held[0] in self.inventory.inventory_itens
-                and not self.inventory.hovered
-                and mouse.hovered_entity not in self.inventory.inventory_itens
-            ):
-                destroy(self.held[0])
+            if self.held[0] in self.inventory.inventory_itens:
+                if mouse.hovered_entity in self.inventory.inventory_slots:
+                    self.held[0].located_slot.empty = True
+                    mouse.hovered_entity.empty = False
+                    self.held[0].x = mouse.hovered_entity.x
+                    self.held[0].y = mouse.hovered_entity.y
+                elif self.inventory.hovered or mouse.hovered_entity in self.inventory.inventory_itens:
+                    self.held[0].position = self.held[2]
+                else:
+                    self.held[0].located_slot.empty = True
+                    destroy(self.held[0])
+                    self.held = None
+                    return
+            self.held[0].z += 1
             self.held[0].collision = True
             self.held = None
 
@@ -75,11 +84,21 @@ class Inventory(Entity):
         self.collider ='box'
         self.color = color.gray
         for c, l in itertools.product(range(12), range(9)):
-            slot = Entity(model='quad',scale=(0.09,0.07), z=-0.1,parent=self, collider='box', color=color.dark_gray,position=Vec2(l*0.0948-0.374,-c*0.0733+0.37))
+            slot = Entity(model='quad',scale=(0.09,0.07), z=-0.1,parent=self, collider='box', color=color.dark_gray,position=Vec2(l*0.0948-0.374,-c*0.0733+0.37),empty=True)
             self.inventory_slots.append(slot)
-        
         self.enabled = False
-
+        
+    def find_empty_slot(self):
+        for slot in self.inventory_slots:
+            if slot.empty == True:
+                slot.empty = False
+                return slot
+            
+    def create_item(self,texture):
+        slot = self.find_empty_slot()
+        self.inventory_itens.append(Entity(model='quad',texture=texture,scale=(0.09,0.07),parent=self, collider='box',position=slot.position,z=-0.2,located_slot=slot))
+            
+            
 class StatusTab():
     def __init__(self):
         super().__init__()

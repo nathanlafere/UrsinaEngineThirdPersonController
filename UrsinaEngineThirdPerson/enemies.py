@@ -8,7 +8,7 @@ from direct.actor.Actor import Actor
     
 class Enemy(data.Character):
     __refs__ = defaultdict(list)
-    def __init__(self,actor_model,position,**kwargs):
+    def __init__(self,actor_model,position,drop_list = ['white_cube','grass','brick','noise'],**kwargs):
         super().__init__()
         self.__refs__['enemys'].append(self)
         self.position = position
@@ -16,6 +16,7 @@ class Enemy(data.Character):
         self.target = None
         self.rest_time, self.walk_time = 8, 5
         self.time_rested, self.walked_time  = 0, 0
+        self.drop_list = drop_list
         
         #attributes
         self.defense = 1
@@ -68,7 +69,9 @@ class Enemy(data.Character):
     def find_target(self):
         print(' ')
 
-
+    def random_loot(self):
+        return random.choice(self.drop_list)
+    
     def raycast_walk(self,range=0):
         feet_ray = raycast(self.position+Vec3(0,0.2,0), self.direction, ignore=list(Enemy.__refs__['enemys']), distance=.2+range)
         head_ray = raycast(self.position+Vec3(0,self.height-.1,0), self.direction, ignore=list(Enemy.__refs__['enemys']), distance=.2+range)

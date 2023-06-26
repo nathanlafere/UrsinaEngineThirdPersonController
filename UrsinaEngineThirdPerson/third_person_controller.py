@@ -16,7 +16,7 @@ class ThirdPersonController(data.Character):
         camera.fov = 90
         mouse.locked = True
         self.mouse_sensitivity = Vec2(40, 40)
-        
+        self.inventory_itens = []
         #attributes
         self.attribute_points = 0
         self.attack = 1 + (self.str*60/100)
@@ -158,6 +158,7 @@ class ThirdPersonController(data.Character):
             entity.health[0] -= damage - getattr(entity, "defense")
             if entity.health[0] <= 0:
                 self.experience[0] += entity.experience
+                data.interface.inventory.create_item(entity.random_loot())
         
     #confirm that it won't hit anything
     def check_raycast(self,direction):
