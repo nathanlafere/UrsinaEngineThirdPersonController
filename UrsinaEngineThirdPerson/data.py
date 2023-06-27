@@ -57,24 +57,25 @@ class Character(Entity):
             self.grounded = True
             # make sure it's not a wall and that the point is not too far up
             if (# walk up slope
-                middle_ray.world_normal != None  
+                middle_ray.world_normal is not None
                 and middle_ray.world_normal.y > .7 
                 and middle_ray.world_point.y - self.world_y < .5 
+                and middle_ray.world_point[1] > terrain_y
             ):
                 self.y = middle_ray.world_point[1]
             elif terrain_y >= self.y and self.y - terrain_y < .5 or terrain_y <= self.y and self.y - terrain_y < .5:
                 self.y = terrain_y
             return
-        elif left_ray.distance <= self.height+.1 and right_ray.distance <= self.height+.1 or self.y - terrain_y <= .1:
+        elif (
+            left_ray.distance <= self.height+.1
+            and right_ray.distance <= self.height+.1
+        ):
             return
         else:
             self.grounded = False
         # if not on ground and not on way up in jump, fall
-        self.y -= min(self.air_time, middle_ray.distance-.05, self.y - terrain_y-.05) * time.dt * 100
+        self.y -= min(self.air_time, middle_ray.distance-.05) * time.dt * 100
         self.air_time += time.dt * .25 * self.gravity
-        terrain_y = ground.return_terrain_y(self.x,self.z)
-        if self.position[1] <= terrain_y-10:
-            self.y = terrain_y+2
         
     # jump functions
     def jump(self):

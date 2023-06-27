@@ -23,6 +23,7 @@ player = third_person_controller.ThirdPersonController()
 data.interface = interface.BaseInterface(player)
 data.ground = perlin_noise_map.PerlinNoiseMap(player,polig_size=10,amp=150)
 ex_portal = structs.Portal(position=(0,15),exit_position=(20,15), rotation_y=70, shader=basic_lighting_shader)
+structs.Bridge(position=(10,2,20))
 
 app.run()
 
